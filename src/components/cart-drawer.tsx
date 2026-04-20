@@ -8,11 +8,16 @@ import Image from "next/image";
 import { useState } from "react";
 
 /*
- * CHECKOUT_URL — replace this once the client provides the Flot checkout link.
- * The customer details (name, phone, address) and cart contents are appended
- * as URL query params so the checkout page can pre-fill them.
+ * Flot merchant checkout for Tesmaraneh. Customer details + cart summary +
+ * total amount (in Sierra Leonean Leones, matching what the shopper saw in
+ * their cart) are appended as URL query params so the checkout page
+ * pre-fills automatically.
  */
-const CHECKOUT_URL = "https://pay.flotme.ai/pay";
+const CHECKOUT_URL = "https://pay.flotme.ai/tesmaraneh";
+
+/** Convert the internal USD price into the SLL amount shown in the UI
+ *  (same rounding as formatPrice in lib/products). */
+const toSLL = (usd: number) => Math.round((usd * 22000) / 10000) * 10000;
 
 type CheckoutForm = {
   name: string;
@@ -43,6 +48,7 @@ export function CartDrawer() {
   const [step, setStep] = useState<"cart" | "details">("cart");
   const [form, setForm] = useState<CheckoutForm>(emptyForm);
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const validate = () => {
     const e: Partial<Record<keyof CheckoutForm, string>> = {};
@@ -68,27 +74,30 @@ export function CartDrawer() {
       )
       .join("; ");
 
+    const amountSLL = toSLL(totalPriceUSD);
+
+    // Send common aliases so Flot picks up the total regardless of the
+    // param name its merchant page expects (amount / total / price).
     const params = new URLSearchParams({
-      customer: form.name,
-      phone: form.phone,
-      address: `${form.address}, ${form.city}`,
+      amount: amountSLL.toString(),
+      total: amountSLL.toString(),
+      price: amountSLL.toString(),
+      currency: "SLL",
+      merchant: "tesmaraneh",
+      reference: `TES-${Date.now()}`,
+      description: `Tesmaraneh order — ${totalItems} item${
+        totalItems === 1 ? "" : "s"
+      }`,
+      customer_name: form.name,
+      customer_phone: form.phone,
+      customer_address: `${form.address}, ${form.city}`,
       items: summary,
-      total: totalPriceUSD.toString(),
-      currency: "USD",
     });
 
-    const url = `${CHECKOUT_URL}?${params.toString()}`;
-
-    const width = 500;
-    const height = 720;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-    window.open(
-      url,
-      "TesmaranehCheckout",
-      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
-    );
+    setCheckoutUrl(`${CHECKOUT_URL}?${params.toString()}`);
   };
+
+  const closeCheckout = () => setCheckoutUrl(null);
 
   const handleClose = () => {
     setIsCartOpen(false);
@@ -375,6 +384,53 @@ export function CartDrawer() {
                 </div>
               </>
             )}
+          </motion.div>
+        </>
+      )}
+
+      {/* Flot checkout popup — in-page modal card with embedded checkout */}
+      {checkoutUrl && (
+        <>
+          <motion.div
+            key="checkout-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={closeCheckout}
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[80]"
+          />
+          <motion.div
+            key="checkout-card"
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-[81] flex items-center justify-center p-0 sm:p-6 pointer-events-none"
+          >
+            <div className="relative w-full h-full sm:w-[480px] sm:h-[760px] sm:max-h-[92vh] bg-white sm:rounded-[24px] overflow-hidden shadow-2xl pointer-events-auto flex flex-col">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--cream-dark)] bg-[var(--cream)] shrink-0">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-[var(--forest)]" />
+                  <span className="font-[family-name:var(--font-body)] text-sm font-semibold text-[var(--charcoal)]">
+                    Secure Checkout · {formatPrice(totalPriceUSD)}
+                  </span>
+                </div>
+                <button
+                  onClick={closeCheckout}
+                  className="cursor-pointer w-9 h-9 rounded-full bg-white hover:bg-[var(--cream-dark)] flex items-center justify-center text-[var(--charcoal)] transition-colors"
+                  aria-label="Close checkout"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <iframe
+                src={checkoutUrl}
+                title="Tesmaraneh secure checkout"
+                allow="payment *; clipboard-write"
+                className="flex-1 w-full border-0 bg-white"
+              />
+            </div>
           </motion.div>
         </>
       )}
