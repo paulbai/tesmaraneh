@@ -1401,7 +1401,7 @@ function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="font-[family-name:var(--font-body)] text-xs text-white/30">
+          <p className="font-[family-name:var(--font-body)] text-sm font-semibold text-white/60">
             &copy; {new Date().getFullYear()} Tesmaraneh. All rights reserved.
           </p>
           <p className="font-[family-name:var(--font-body)] text-sm font-semibold text-white/60">
