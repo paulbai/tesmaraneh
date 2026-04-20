@@ -162,7 +162,7 @@ export default function MarketplacePage() {
         </section>
 
         {/* Filters */}
-        <section className="sticky top-14 sm:top-16 md:top-20 z-30 bg-[var(--cream)]/95 backdrop-blur-md border-b border-[var(--cream-dark)]">
+        <section className="sticky top-16 sm:top-20 md:top-24 z-30 bg-[var(--cream)]/95 backdrop-blur-md border-b border-[var(--cream-dark)]">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 py-4 flex items-center gap-3 overflow-x-auto">
             <div className="flex items-center gap-2 text-[var(--warm-gray)] shrink-0 hidden sm:flex">
               <Filter size={14} />

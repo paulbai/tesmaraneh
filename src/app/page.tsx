@@ -184,24 +184,20 @@ function Navbar() {
             : "bg-transparent"
         }`}
       >
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-14 sm:h-16 md:h-20">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-16 sm:h-20 md:h-24">
           <a
             href="#"
-            className={`flex items-center gap-2 transition-colors duration-500 ${
-              scrolled || mobileOpen ? "text-[var(--charcoal)]" : "text-white"
-            }`}
+            className="flex items-center shrink-0"
+            aria-label="Tesmaraneh — Home"
           >
             <Image
               src="/logo-nobg.png"
               alt="Tesmaraneh"
-              width={40}
-              height={40}
+              width={96}
+              height={96}
               priority
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain transition-all duration-500"
+              className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
             />
-            <span className="font-[family-name:var(--font-logo)] text-lg sm:text-xl md:text-2xl tracking-tight">
-              Tesmaraneh
-            </span>
           </a>
 
           {/* Desktop nav links */}
@@ -272,7 +268,7 @@ function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 top-14 z-40 bg-[var(--cream)] md:hidden"
+            className="fixed inset-0 top-16 z-40 bg-[var(--cream)] md:hidden"
           >
             <div className="flex flex-col items-center justify-center h-full gap-6 pb-20">
               {navLinks.map((link, i) => (
@@ -328,7 +324,7 @@ function Hero() {
   return (
     <section
       ref={ref}
-      className="relative min-h-screen flex items-center overflow-hidden pt-14 sm:pt-16 md:pt-20 bg-black"
+      className="relative min-h-screen flex items-center overflow-hidden pt-16 sm:pt-20 md:pt-24 bg-black"
     >
       {/* Spiral Animation Background */}
       <div className="absolute inset-0 opacity-60">

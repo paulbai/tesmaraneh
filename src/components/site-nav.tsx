@@ -54,19 +54,16 @@ export function SiteNav() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[var(--cream)]/90 border-b border-[var(--cream-dark)]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-14 sm:h-16 md:h-20">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-16 sm:h-20 md:h-24">
+          <Link href="/" className="flex items-center shrink-0" aria-label="Tesmaraneh — Home">
             <Image
               src="/logo-nobg.png"
               alt="Tesmaraneh"
-              width={40}
-              height={40}
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+              width={96}
+              height={96}
+              className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
               priority
             />
-            <span className="font-[family-name:var(--font-logo)] text-lg sm:text-xl md:text-2xl tracking-tight text-[var(--charcoal)]">
-              Tesmaraneh
-            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-[family-name:var(--font-body)] font-medium tracking-widest uppercase text-[var(--warm-gray)]">
@@ -121,7 +118,7 @@ export function SiteNav() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 top-14 z-40 bg-[var(--cream)] md:hidden"
+            className="fixed inset-0 top-16 z-40 bg-[var(--cream)] md:hidden"
           >
             <div className="flex flex-col items-center justify-center h-full gap-6 pb-20">
               {navLinks.map((link, i) => (
