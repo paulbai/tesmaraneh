@@ -42,6 +42,14 @@ function FacebookIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+function TikTokIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.321 5.562a5.124 5.124 0 0 1-3.414-1.267 5.124 5.124 0 0 1-1.537-2.969V1h-3.363v12.528a3.065 3.065 0 0 1-5.506 1.884 3.065 3.065 0 0 1 3.065-4.949v-3.4A6.465 6.465 0 0 0 3.3 13.53a6.465 6.465 0 0 0 11.08 4.567 6.465 6.465 0 0 0 1.886-4.567V8.687a8.466 8.466 0 0 0 4.945 1.578V6.9a5.124 5.124 0 0 1-1.89-1.338Z"/>
+    </svg>
+  );
+}
+
 /* ─── Reusable animated section wrapper ─── */
 function AnimatedSection({
   children,
@@ -373,9 +381,9 @@ function Hero() {
               transition={{ duration: 0.8, delay: 0.9 }}
               className="text-sm sm:text-base md:text-xl text-white/40 leading-relaxed max-w-md font-[family-name:var(--font-body)] font-light"
             >
-              Ethical fashion rooted in West African heritage. Timeless designs
-              crafted with Gara tie-dye, batik, and woven cloth from Sierra
-              Leone.
+              A Sierra Leonean clothing brand creating beautiful, timeless
+              designs for women — crafted with local, sustainable techniques
+              that empower women and artisans across the region.
             </motion.p>
 
             <motion.div
@@ -571,7 +579,7 @@ function About() {
                     Founder & Designer
                   </p>
                   <div className="mt-6 px-4 py-1.5 rounded-full border border-white/20 text-xs tracking-wider uppercase opacity-60">
-                    Laureate &middot; Women in Africa 2021
+                    Winner &middot; Women in Africa 2021
                   </div>
                 </div>
                 {/* Decorative pattern */}
@@ -622,20 +630,21 @@ function About() {
 
             <AnimatedSection delay={0.3}>
               <p className="text-base sm:text-lg text-[var(--warm-gray)] leading-relaxed font-[family-name:var(--font-body)] font-light">
-                Founded in 2018 by Isatu Bundu in Freetown, Sierra Leone,
-                Tesmaraneh is a sustainable fashion brand producing timeless
-                wearable designs using West African local fabrics. From Gara
-                tie-dye to hand-woven country cloth, every piece tells a story
-                of heritage and purpose.
+                Tesmaraneh is a local Sierra Leonean clothing brand founded by
+                Isatu Bundu in Freetown — unofficially in 2016 and officially
+                launched in 2018. We use local and sustainable techniques to
+                create beautiful, timeless designs for women, working with
+                handmade fabrics including Gara tie-dye, batik, and hand-woven
+                country cloth.
               </p>
             </AnimatedSection>
 
             <AnimatedSection delay={0.4}>
               <p className="text-base sm:text-lg text-[var(--warm-gray)] leading-relaxed font-[family-name:var(--font-body)] font-light">
-                Named a Laureate of Women in Africa in 2021, Isatu&rsquo;s
-                mission goes beyond fashion &mdash; empowering women through
-                skills training, promoting girls&rsquo; education, and building
-                a stronger local textile industry.
+                Our mission is to showcase Sierra Leonean clothing around the
+                region and beyond, while empowering women and local artisans in
+                the process. Every piece tells a story of heritage, craft, and
+                the women who make it possible.
               </p>
             </AnimatedSection>
 
@@ -647,7 +656,7 @@ function About() {
                   </div>
                   <div>
                     <p className="font-[family-name:var(--font-body)] font-bold text-sm text-[var(--charcoal)]">
-                      2021 Laureate
+                      2021 Winner
                     </p>
                     <p className="font-[family-name:var(--font-body)] text-xs text-[var(--warm-gray)]">
                       Women in Africa
@@ -656,14 +665,14 @@ function About() {
                 </div>
                 <div className="flex items-center gap-3 bg-white rounded-2xl px-5 py-3 shadow-sm border border-[var(--cream-dark)]">
                   <div className="w-10 h-10 rounded-full bg-[var(--indigo)]/10 flex items-center justify-center">
-                    <Globe size={18} className="text-[var(--indigo)]" />
+                    <Sparkles size={18} className="text-[var(--indigo)]" />
                   </div>
                   <div>
                     <p className="font-[family-name:var(--font-body)] font-bold text-sm text-[var(--charcoal)]">
-                      AFWL 2023
+                      TEF Alumni 2019
                     </p>
                     <p className="font-[family-name:var(--font-body)] text-xs text-[var(--warm-gray)]">
-                      London Exhibition
+                      Tony Elumelu Foundation
                     </p>
                   </div>
                 </div>
@@ -954,10 +963,10 @@ function Values() {
 /* ─── IMPACT SECTION ─── */
 function Impact() {
   const stats = [
-    { number: "2018", label: "Founded", suffix: "" },
-    { number: "42K", label: "AFWL Visitors", suffix: "+" },
-    { number: "100", label: "Local Artisans", suffix: "%" },
-    { number: "7", label: "Years of Impact", suffix: "+" },
+    { number: "2016", label: "Founded", suffix: "" },
+    { number: "4", label: "Global Recognitions", suffix: "" },
+    { number: "100", label: "Locally Made", suffix: "%" },
+    { number: "10", label: "Years of Impact", suffix: "+" },
   ];
 
   return (
@@ -1055,51 +1064,75 @@ function Recognition() {
           </AnimatedSection>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
-          <AnimatedSection>
-            <div className="group bg-white rounded-[20px] sm:rounded-[28px] p-6 sm:p-10 shadow-sm border border-[var(--cream-dark)] hover:shadow-xl transition-all duration-500 h-full">
-              <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--ochre)]/10 flex items-center justify-center">
-                  <Award size={20} className="text-[var(--ochre)]" />
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+          {[
+            {
+              year: "2019",
+              title: "Tony Elumelu Foundation",
+              subtitle: "Alumni",
+              description:
+                "Selected for the prestigious Tony Elumelu Foundation Entrepreneurship Programme, joining a pan-African community of high-impact entrepreneurs driving economic transformation across the continent.",
+              icon: <Sparkles size={20} />,
+              color: "terracotta",
+            },
+            {
+              year: "2021",
+              title: "Women in Africa",
+              subtitle: "Winner / Laureate",
+              description:
+                "Founder Isatu Bundu was named a Laureate of Women in Africa, recognizing her outstanding contribution to empowering women through sustainable fashion and economic development in Sierra Leone.",
+              icon: <Award size={20} />,
+              color: "ochre",
+            },
+            {
+              year: "2025",
+              title: "ShowcaseHer Africa",
+              subtitle: "Impacther Export Readiness",
+              description:
+                "Completed the Impacther Export Readiness Training (ShowcaseHer Africa), equipping Tesmaraneh with the tools and partnerships to scale African-made fashion to international markets.",
+              icon: <Globe size={20} />,
+              color: "indigo",
+            },
+            {
+              year: "2026",
+              title: "Alibaba eFounders Initiative",
+              subtitle: "Innovator Masters Program",
+              description:
+                "Part of the Alibaba Innovator Masters Program — a global cohort of entrepreneurs learning to harness technology and e-commerce to grow their businesses and create jobs at home.",
+              icon: <Users size={20} />,
+              color: "forest",
+            },
+          ].map((item, i) => (
+            <AnimatedSection key={item.year} delay={i * 0.1}>
+              <div className="group bg-white rounded-[20px] sm:rounded-[28px] p-6 sm:p-8 shadow-sm border border-[var(--cream-dark)] hover:shadow-xl transition-all duration-500 h-full">
+                <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                  <div
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center"
+                    style={{ backgroundColor: `var(--${item.color})15` }}
+                  >
+                    <span style={{ color: `var(--${item.color})` }}>{item.icon}</span>
+                  </div>
+                  <div>
+                    <span
+                      className="font-[family-name:var(--font-body)] text-sm font-bold tracking-wider uppercase block leading-tight"
+                      style={{ color: `var(--${item.color})` }}
+                    >
+                      {item.year}
+                    </span>
+                    <span className="font-[family-name:var(--font-body)] text-[10px] tracking-widest uppercase text-[var(--warm-gray)] block leading-tight">
+                      {item.subtitle}
+                    </span>
+                  </div>
                 </div>
-                <span className="font-[family-name:var(--font-body)] text-sm text-[var(--ochre)] font-bold tracking-wider uppercase">
-                  2021
-                </span>
+                <h3 className="font-[family-name:var(--font-display)] text-xl sm:text-2xl font-bold text-[var(--charcoal)] mb-3 sm:mb-4">
+                  {item.title}
+                </h3>
+                <p className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)] leading-relaxed font-light">
+                  {item.description}
+                </p>
               </div>
-              <h3 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-bold text-[var(--charcoal)] mb-3 sm:mb-4">
-                Women in Africa Laureate
-              </h3>
-              <p className="font-[family-name:var(--font-body)] text-[var(--warm-gray)] leading-relaxed font-light">
-                Founder Isatu Bundu was named a Laureate of Women in Africa,
-                recognizing her outstanding contribution to empowering women
-                through sustainable fashion and economic development in Sierra
-                Leone.
-              </p>
-            </div>
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.15}>
-            <div className="group bg-white rounded-[20px] sm:rounded-[28px] p-6 sm:p-10 shadow-sm border border-[var(--cream-dark)] hover:shadow-xl transition-all duration-500 h-full">
-              <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--indigo)]/10 flex items-center justify-center">
-                  <Globe size={20} className="text-[var(--indigo)]" />
-                </div>
-                <span className="font-[family-name:var(--font-body)] text-sm text-[var(--indigo)] font-bold tracking-wider uppercase">
-                  2023
-                </span>
-              </div>
-              <h3 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-bold text-[var(--charcoal)] mb-3 sm:mb-4">
-                Africa Fashion Week London
-              </h3>
-              <p className="font-[family-name:var(--font-body)] text-[var(--warm-gray)] leading-relaxed font-light">
-                One of only two Sierra Leonean brands selected to exhibit at
-                AFWL 2023, attended by 42,000+ visitors including international
-                buyers, retailers, and global media. Part of a UK
-                government-funded initiative supporting Sierra Leonean fashion
-                exports.
-              </p>
-            </div>
-          </AnimatedSection>
+            </AnimatedSection>
+          ))}
         </div>
       </div>
     </section>
@@ -1165,13 +1198,13 @@ function Footer() {
                 Tesmaraneh
               </h3>
               <p className="font-[family-name:var(--font-body)] text-white/50 leading-relaxed font-light">
-                Sustainable fashion that empowers women and celebrates Africa.
-                Crafted with care and eco-consciousness in Freetown, Sierra
-                Leone.
+                A Sierra Leonean clothing brand creating beautiful, timeless
+                designs for women — using local, sustainable techniques that
+                empower women and artisans across the region.
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <a
-                  href="https://instagram.com/tesmaraneh"
+                  href="https://www.instagram.com/tesmaraneh"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[var(--terracotta)] transition-colors duration-300"
@@ -1180,13 +1213,31 @@ function Footer() {
                   <InstagramIcon size={18} />
                 </a>
                 <a
-                  href="https://facebook.com/tesmaraneh"
+                  href="https://www.instagram.com/tesmaranehfoundation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[var(--terracotta)] transition-colors duration-300"
+                  aria-label="Tesmaraneh Foundation Instagram"
+                >
+                  <InstagramIcon size={18} />
+                </a>
+                <a
+                  href="https://www.facebook.com/tesmaraneh"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[var(--terracotta)] transition-colors duration-300"
                   aria-label="Facebook"
                 >
                   <FacebookIcon size={18} />
+                </a>
+                <a
+                  href="https://www.tiktok.com/@tesmaraneh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[var(--terracotta)] transition-colors duration-300"
+                  aria-label="TikTok"
+                >
+                  <TikTokIcon size={18} />
                 </a>
               </div>
             </div>
