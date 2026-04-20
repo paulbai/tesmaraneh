@@ -166,7 +166,7 @@ function Navbar() {
 
   const navLinks = [
     { label: "About", href: "#about" },
-    { label: "Collections", href: "#collections" },
+    { label: "Marketplace", href: "/marketplace" },
     { label: "Values", href: "#values" },
     { label: "Impact", href: "#impact" },
     { label: "Contact", href: "#contact" },
@@ -192,14 +192,12 @@ function Navbar() {
             }`}
           >
             <Image
-              src="/logo.png"
+              src="/logo-nobg.png"
               alt="Tesmaraneh"
-              width={36}
-              height={36}
+              width={40}
+              height={40}
               priority
-              className={`w-8 h-8 sm:w-9 sm:h-9 object-contain transition-all duration-500 ${
-                scrolled || mobileOpen ? "" : "brightness-0 invert"
-              }`}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain transition-all duration-500"
             />
             <span className="font-[family-name:var(--font-logo)] text-lg sm:text-xl md:text-2xl tracking-tight">
               Tesmaraneh
@@ -416,12 +414,6 @@ function Hero() {
                   className="group-hover:translate-x-1 transition-transform duration-300"
                 />
               </Link>
-              <a
-                href="#about"
-                className="cursor-pointer inline-flex items-center gap-2 sm:gap-3 border-2 border-white/30 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-white/10 hover:border-white/50 transition-all duration-500"
-              >
-                Our Story
-              </a>
             </motion.div>
           </div>
 
@@ -724,6 +716,7 @@ function Collections({
     description: string;
     color: string;
     key: "gara" | "batik" | "woven";
+    preview: string;
   }[] = [
     {
       name: "Gara Tie-Dye",
@@ -731,6 +724,7 @@ function Collections({
       description:
         "Ancient dyeing techniques creating unique, flowing patterns on every piece",
       color: "from-[var(--terracotta)] to-[var(--ochre)]",
+      preview: "/products/mabel-dress/1.jpg",
     },
     {
       name: "Batik Collection",
@@ -738,6 +732,7 @@ function Collections({
       description:
         "Wax-resist dyed fabrics transformed into contemporary silhouettes",
       color: "from-[var(--indigo)] to-[var(--indigo-light)]",
+      preview: "/products/miriam-kimono/1.jpg",
     },
     {
       name: "Woven Cloth",
@@ -745,6 +740,7 @@ function Collections({
       description:
         "Traditional country cloth hand-woven into modern statement pieces",
       color: "from-[var(--forest)] to-[var(--forest-light)]",
+      preview: "/products/gbinti-jacket/1.jpg",
     },
   ];
 
@@ -789,6 +785,18 @@ function Collections({
                 <div
                   className={`aspect-[4/3] sm:aspect-[3/4] rounded-[20px] sm:rounded-[28px] bg-gradient-to-br ${item.color} overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-shadow duration-500`}
                 >
+                  {/* Preview image */}
+                  <Image
+                    src={item.preview}
+                    alt={`${item.name} preview`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+                  />
+
+                  {/* Gradient overlay for text legibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
                   {/* Pattern overlay */}
                   <div className="absolute inset-0 opacity-10">
                     <svg
@@ -1248,8 +1256,22 @@ function Footer() {
   return (
     <footer
       id="contact"
-      className="bg-[var(--charcoal)] text-white pt-16 sm:pt-24 pb-8 relative grain-overlay"
+      className="bg-[var(--charcoal)] text-white pt-16 sm:pt-24 pb-8 relative grain-overlay overflow-hidden"
     >
+      {/* Decorative logo background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.08] select-none z-0"
+      >
+        <Image
+          src="/logo-nobg.png"
+          alt=""
+          width={900}
+          height={900}
+          className="w-[70%] max-w-[900px] h-auto object-contain"
+        />
+      </div>
+
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-10 sm:gap-12 md:gap-16 mb-12 sm:mb-20">
           {/* Brand */}
@@ -1386,8 +1408,16 @@ function Footer() {
           <p className="font-[family-name:var(--font-body)] text-xs text-white/30">
             &copy; {new Date().getFullYear()} Tesmaraneh. All rights reserved.
           </p>
-          <p className="font-[family-name:var(--font-accent)] text-sm italic text-white/20">
-            Wear the culture. Change the story.
+          <p className="font-[family-name:var(--font-body)] text-sm font-semibold text-white/60">
+            Built and Powered by{" "}
+            <a
+              href="https://www.flotme.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--ochre)] hover:text-[var(--ochre-light)] font-bold transition-colors duration-300"
+            >
+              Flot
+            </a>
           </p>
         </div>
       </div>

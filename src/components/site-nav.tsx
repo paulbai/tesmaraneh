@@ -44,9 +44,10 @@ export function SiteNav() {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Marketplace", href: "/marketplace" },
     { label: "About", href: "/#about" },
-    { label: "Collections", href: "/#collections" },
+    { label: "Marketplace", href: "/marketplace" },
+    { label: "Values", href: "/#values" },
+    { label: "Impact", href: "/#impact" },
     { label: "Contact", href: "/#contact" },
   ];
 
@@ -56,11 +57,11 @@ export function SiteNav() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-14 sm:h-16 md:h-20">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image
-              src="/logo.png"
+              src="/logo-nobg.png"
               alt="Tesmaraneh"
-              width={36}
-              height={36}
-              className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+              width={40}
+              height={40}
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
               priority
             />
             <span className="font-[family-name:var(--font-logo)] text-lg sm:text-xl md:text-2xl tracking-tight text-[var(--charcoal)]">

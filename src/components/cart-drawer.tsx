@@ -19,7 +19,6 @@ type CheckoutForm = {
   phone: string;
   address: string;
   city: string;
-  notes: string;
 };
 
 const emptyForm: CheckoutForm = {
@@ -27,7 +26,6 @@ const emptyForm: CheckoutForm = {
   phone: "",
   address: "",
   city: "",
-  notes: "",
 };
 
 export function CartDrawer() {
@@ -74,7 +72,6 @@ export function CartDrawer() {
       customer: form.name,
       phone: form.phone,
       address: `${form.address}, ${form.city}`,
-      notes: form.notes,
       items: summary,
       total: totalPriceUSD.toString(),
       currency: "USD",
@@ -323,28 +320,28 @@ export function CartDrawer() {
                     placeholder="Freetown"
                   />
 
-                  <FormField
-                    label="Order Notes (optional)"
-                    name="notes"
-                    value={form.notes}
-                    onChange={(v) => setForm({ ...form, notes: v })}
-                    placeholder="Delivery instructions, sizing preferences…"
-                    textarea
-                  />
-
-                  <div className="bg-[var(--cream)] rounded-2xl p-4 space-y-2 border border-[var(--cream-dark)]">
+                  <div className="bg-[var(--cream)] rounded-2xl p-4 space-y-3 border border-[var(--cream-dark)]">
                     <p className="font-[family-name:var(--font-body)] text-xs tracking-widest uppercase text-[var(--warm-gray)]">
                       Order Summary
                     </p>
                     {items.map((i) => (
                       <div
                         key={i.product.id}
-                        className="flex justify-between text-sm font-[family-name:var(--font-body)]"
+                        className="flex justify-between gap-3 text-sm font-[family-name:var(--font-body)]"
                       >
-                        <span className="text-[var(--charcoal)]">
-                          {i.product.name} × {i.quantity}
-                        </span>
-                        <span className="text-[var(--warm-gray)]">
+                        <div className="min-w-0">
+                          <p className="text-[var(--charcoal)] font-semibold truncate">
+                            {i.product.name} × {i.quantity}
+                          </p>
+                          {(i.size || i.color) && (
+                            <p className="text-xs text-[var(--warm-gray)] mt-0.5">
+                              {i.size ? `Size ${i.size}` : ""}
+                              {i.size && i.color ? " · " : ""}
+                              {i.color ? `Color ${i.color}` : ""}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-[var(--warm-gray)] shrink-0">
                           {formatPrice(i.product.priceUSD * i.quantity)}
                         </span>
                       </div>
