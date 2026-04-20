@@ -18,9 +18,10 @@ export interface CartItem {
   color?: string;
 }
 
-// Display price in Sierra Leonean Leones (old Leone, ~22,000 per USD)
+// Display price in new Sierra Leonean Leones (~22 per USD; old Le/1000).
+// E.g. $85 → Le 1,870 (was Le 1,870,000 under the old note-set).
 export function formatPrice(priceUSD: number): string {
-  const sle = Math.round((priceUSD * 22000) / 10000) * 10000;
+  const sle = Math.round((priceUSD * 22) / 10) * 10;
   return `Le ${sle.toLocaleString()}`;
 }
 

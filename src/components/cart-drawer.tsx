@@ -15,9 +15,9 @@ import { useState } from "react";
  */
 const CHECKOUT_URL = "https://pay.flotme.ai/tesmaraneh";
 
-/** Convert the internal USD price into the SLL amount shown in the UI
+/** Convert the internal USD price into the new-Leone amount shown in the UI
  *  (same rounding as formatPrice in lib/products). */
-const toSLL = (usd: number) => Math.round((usd * 22000) / 10000) * 10000;
+const toSLL = (usd: number) => Math.round((usd * 22) / 10) * 10;
 
 type CheckoutForm = {
   name: string;
