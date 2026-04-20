@@ -1,22 +1,29 @@
 @import "tailwindcss";
 
 :root {
+  /* Tesmaraneh brand palette */
   --background: #FAF6F1;
-  --foreground: #1A1A1A;
+  --foreground: #432118;
   --cream: #FAF6F1;
-  --cream-dark: #F0EAE0;
-  --terracotta: #C4633A;
-  --terracotta-light: #D4805E;
-  --terracotta-dark: #A04E2B;
-  --indigo: #2C3E6B;
-  --indigo-light: #3D5291;
-  --ochre: #C8973E;
-  --ochre-light: #D4AD5E;
-  --forest: #3A5A40;
-  --forest-light: #4F7A56;
-  --charcoal: #2A2A2A;
-  --warm-gray: #8A8078;
-  --warm-gray-light: #B8B0A6;
+  --cream-dark: #EFE6D6;
+  /* Primary accent - warm gold/orange */
+  --terracotta: #F3920F;
+  --terracotta-light: #F7A93B;
+  --terracotta-dark: #C77500;
+  /* Secondary accent - light gold */
+  --ochre: #EEBC5A;
+  --ochre-light: #F3CF86;
+  /* Tertiary - warm tan/beige */
+  --indigo: #B99670;
+  --indigo-light: #D0B290;
+  /* Natural - warm tan */
+  --forest: #B99670;
+  --forest-light: #D0B290;
+  /* Deep brown (replaces charcoal) */
+  --charcoal: #432118;
+  --charcoal-soft: #5C3323;
+  --warm-gray: #8A6E5A;
+  --warm-gray-light: #C4A98F;
 }
 
 @theme inline {
@@ -39,6 +46,7 @@
   --font-display: 'Playfair Display', serif;
   --font-body: 'DM Sans', sans-serif;
   --font-accent: 'Cormorant Garamond', serif;
+  --font-logo: 'Bagel Fat One', system-ui, sans-serif;
 }
 
 body {

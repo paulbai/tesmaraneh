@@ -2,10 +2,13 @@
 
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { SpiralAnimation } from "@/components/ui/spiral-animation";
 import { CollectionModal } from "@/components/collection-modal";
 import { CartDrawer } from "@/components/cart-drawer";
 import { useCart } from "@/context/cart-context";
+import { products } from "@/lib/products";
 import {
   ArrowRight,
   Leaf,
@@ -16,7 +19,6 @@ import {
   MapPin,
   Mail,
   Phone,
-  ExternalLink,
   ChevronDown,
   Award,
   Users,
@@ -185,11 +187,23 @@ function Navbar() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-14 sm:h-16 md:h-20">
           <a
             href="#"
-            className={`font-[family-name:var(--font-display)] text-lg sm:text-xl md:text-2xl font-bold tracking-tight transition-colors duration-500 ${
+            className={`flex items-center gap-2 transition-colors duration-500 ${
               scrolled || mobileOpen ? "text-[var(--charcoal)]" : "text-white"
             }`}
           >
-            Tesmaraneh
+            <Image
+              src="/logo.png"
+              alt="Tesmaraneh"
+              width={36}
+              height={36}
+              priority
+              className={`w-8 h-8 sm:w-9 sm:h-9 object-contain transition-all duration-500 ${
+                scrolled || mobileOpen ? "" : "brightness-0 invert"
+              }`}
+            />
+            <span className="font-[family-name:var(--font-logo)] text-lg sm:text-xl md:text-2xl tracking-tight">
+              Tesmaraneh
+            </span>
           </a>
 
           {/* Desktop nav links */}
@@ -228,15 +242,13 @@ function Navbar() {
               )}
             </button>
 
-            <a
-              href="https://marketplace.anka.africa/en/shops/tesmaraneh"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/marketplace"
               className="cursor-pointer hidden sm:inline-flex items-center gap-2 bg-[var(--terracotta)] text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-colors duration-300"
             >
               <Sparkles size={14} />
               Shop Now
-            </a>
+            </Link>
 
             {/* Mobile hamburger */}
             <button
@@ -278,18 +290,20 @@ function Navbar() {
                   {link.label}
                 </motion.a>
               ))}
-              <motion.a
-                href="https://marketplace.anka.africa/en/shops/tesmaraneh"
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="mt-4 inline-flex items-center gap-2 bg-[var(--terracotta)] text-white px-8 py-3.5 rounded-full text-base font-[family-name:var(--font-body)] font-semibold tracking-wide"
               >
-                <Sparkles size={16} />
-                Shop Now
-              </motion.a>
+                <Link
+                  href="/marketplace"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-4 inline-flex items-center gap-2 bg-[var(--terracotta)] text-white px-8 py-3.5 rounded-full text-base font-[family-name:var(--font-body)] font-semibold tracking-wide"
+                >
+                  <Sparkles size={16} />
+                  Shop Now
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}
@@ -392,16 +406,16 @@ function Hero() {
               transition={{ duration: 0.8, delay: 1.1 }}
               className="flex flex-wrap gap-4 pt-2"
             >
-              <a
-                href="#collections"
-                className="cursor-pointer group inline-flex items-center gap-2 sm:gap-3 bg-white text-black px-5 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--ochre-light)] hover:text-white transition-all duration-500"
+              <Link
+                href="/marketplace"
+                className="cursor-pointer group inline-flex items-center gap-2 sm:gap-3 bg-white text-black px-5 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta)] hover:text-white transition-all duration-500"
               >
-                Explore Collection
+                Shop the Marketplace
                 <ArrowRight
                   size={18}
                   className="group-hover:translate-x-1 transition-transform duration-300"
                 />
-              </a>
+              </Link>
               <a
                 href="#about"
                 className="cursor-pointer inline-flex items-center gap-2 sm:gap-3 border-2 border-white/30 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-white/10 hover:border-white/50 transition-all duration-500"
@@ -678,6 +692,20 @@ function About() {
                 </div>
               </div>
             </AnimatedSection>
+
+            {/* About CTA */}
+            <AnimatedSection delay={0.6}>
+              <Link
+                href="/marketplace"
+                className="cursor-pointer group inline-flex items-center gap-3 bg-[var(--terracotta)] text-white px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-all duration-500 shadow-lg"
+              >
+                Explore Our Marketplace
+                <ArrowRight
+                  size={16}
+                  className="group-hover:translate-x-1 transition-transform duration-300"
+                />
+              </Link>
+            </AnimatedSection>
           </div>
         </div>
       </div>
@@ -871,6 +899,25 @@ function Collections({
             ))}
           </div>
         </AnimatedSection>
+
+        {/* Shop CTA */}
+        <AnimatedSection delay={0.4}>
+          <div className="mt-12 sm:mt-20 text-center">
+            <Link
+              href="/marketplace"
+              className="cursor-pointer group inline-flex items-center gap-3 bg-[var(--terracotta)] text-white px-8 sm:px-10 py-4 sm:py-5 rounded-full text-base sm:text-lg font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-all duration-500 shadow-xl"
+            >
+              Shop the Full Marketplace
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform duration-300"
+              />
+            </Link>
+            <p className="mt-4 font-[family-name:var(--font-body)] text-sm text-white/40">
+              {products.length} handcrafted pieces · Made in Sierra Leone
+            </p>
+          </div>
+        </AnimatedSection>
       </div>
     </section>
   );
@@ -955,6 +1002,22 @@ function Values() {
             </AnimatedSection>
           ))}
         </div>
+
+        {/* CTA */}
+        <AnimatedSection delay={0.4}>
+          <div className="mt-12 sm:mt-20 text-center">
+            <Link
+              href="/marketplace"
+              className="cursor-pointer group inline-flex items-center gap-3 bg-[var(--charcoal)] text-white px-7 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta)] transition-all duration-500"
+            >
+              Support Women Artisans — Shop Now
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform duration-300"
+              />
+            </Link>
+          </div>
+        </AnimatedSection>
       </div>
     </section>
   );
@@ -1164,18 +1227,16 @@ function BigQuote() {
         </AnimatedSection>
 
         <AnimatedSection delay={0.3}>
-          <a
-            href="https://marketplace.anka.africa/en/shops/tesmaraneh"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/marketplace"
             className="cursor-pointer group inline-flex items-center gap-2 sm:gap-3 bg-[var(--terracotta)] text-white px-6 sm:px-10 py-3.5 sm:py-5 rounded-full text-base sm:text-lg font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-all duration-500 shadow-lg hover:shadow-2xl"
           >
-            Shop on ANKA Marketplace
-            <ExternalLink
+            Shop the Collection
+            <ArrowRight
               size={18}
-              className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300"
+              className="group-hover:translate-x-1 transition-transform duration-300"
             />
-          </a>
+          </Link>
         </AnimatedSection>
       </div>
     </section>
@@ -1255,10 +1316,7 @@ function Footer() {
                   { label: "Collections", href: "#collections" },
                   { label: "Our Values", href: "#values" },
                   { label: "Impact", href: "#impact" },
-                  {
-                    label: "Shop on ANKA",
-                    href: "https://marketplace.anka.africa/en/shops/tesmaraneh",
-                  },
+                  { label: "Shop Marketplace", href: "/marketplace" },
                 ].map((link) => (
                   <li key={link.label}>
                     <a

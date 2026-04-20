@@ -1,193 +1,321 @@
 export interface Product {
   id: string;
   name: string;
-  price: number; // in Sierra Leonean Leones
+  priceUSD: number; // client pricing
   collection: "gara" | "batik" | "woven";
   category: string;
+  fabric: string;
   description: string;
-  image: string; // Unsplash placeholder
+  colors: string[];
+  sizes: string[];
+  images: string[]; // paths under /public
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
+  size?: string;
+  color?: string;
 }
 
-// Format price in Leones
-export function formatPrice(amount: number): string {
-  return `SLE ${amount.toLocaleString()}`;
+// Display price in Sierra Leonean Leones (old Leone, ~22,000 per USD)
+export function formatPrice(priceUSD: number): string {
+  const sle = Math.round((priceUSD * 22000) / 10000) * 10000;
+  return `Le ${sle.toLocaleString()}`;
 }
+
+export function formatPriceUSD(priceUSD: number): string {
+  return `$${priceUSD}`;
+}
+
+// Helper to build image paths
+const img = (slug: string, n: number) => `/products/${slug}/${n}.jpg`;
+const imgs = (slug: string, count: number) =>
+  Array.from({ length: count }, (_, i) => img(slug, i + 1));
 
 export const products: Product[] = [
-  // Gara Tie-Dye Collection
+  // ─── GARA (Hand-dyed) Collection ───
   {
-    id: "gara-1",
-    name: "Gara Wrap Dress",
-    price: 450000,
+    id: "hawawa-pants",
+    name: "Hawawa Pants",
+    priceUSD: 79,
+    collection: "gara",
+    category: "Pants",
+    fabric: "Hand dyed cotton",
+    description:
+      "Relaxed-fit, light-weight hand-dyed pants with natural movement. Hand-tailored by our artisans in the North of Sierra Leone.",
+    colors: [
+      "Yellow & Orange",
+      "Red & Yellow",
+      "Orange & Purple",
+      "Lemon Green & Pink",
+      "Pink & Yellow",
+      "Blue & Purple",
+    ],
+    sizes: ["UK6", "UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("hawawa-pants", 4),
+  },
+  {
+    id: "mabel-dress",
+    name: "Mabel Dress",
+    priceUSD: 44,
     collection: "gara",
     category: "Dress",
-    description: "Flowing wrap dress in hand-dyed Gara tie-dye with indigo and white spiral patterns",
-    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400&h=500&fit=crop",
+    fabric: "Hand-dyed satin",
+    description:
+      "Free-size, relaxed-fit hand-dyed satin dress with signature cloud design. Light, flowing, and made for every day.",
+    colors: ["Mix colors"],
+    sizes: ["Free Size"],
+    images: imgs("mabel-dress", 4),
   },
   {
-    id: "gara-2",
-    name: "Gara Headwrap",
-    price: 120000,
+    id: "sowa-jumpsuit",
+    name: "Sowa Jumpsuit",
+    priceUSD: 85,
     collection: "gara",
-    category: "Accessory",
-    description: "Traditional headwrap in vibrant Gara tie-dye, perfect for everyday or ceremonies",
-    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=500&fit=crop",
+    category: "Jumpsuit",
+    fabric: "Hand-dyed cotton",
+    description:
+      "Relaxed-fit hand-batik cotton jumpsuit with a mix of flower, draft and straight-line designs. Light-weight with beautiful movement.",
+    colors: ["Mix color"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("sowa-jumpsuit", 4),
   },
   {
-    id: "gara-3",
-    name: "Gara Tote Bag",
-    price: 180000,
+    id: "mamani-dress",
+    name: "Mamani Dress",
+    priceUSD: 85,
     collection: "gara",
-    category: "Bag",
-    description: "Spacious tote bag crafted from reinforced Gara fabric with leather handles",
-    image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "Hand-dyed cotton",
+    description:
+      "Relaxed-fit, hand-batik cotton dress with line design. Hand-dyed and tailored in Sierra Leone.",
+    colors: ["Mix color"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("mamani-dress", 2),
   },
   {
-    id: "gara-4",
-    name: "Gara A-Line Skirt",
-    price: 320000,
+    id: "yabom",
+    name: "Yabom",
+    priceUSD: 69,
     collection: "gara",
-    category: "Skirt",
-    description: "Elegant A-line skirt with deep indigo Gara dye and freeform pattern",
-    image: "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400&h=500&fit=crop",
-  },
-  {
-    id: "gara-5",
-    name: "Gara Bedspread",
-    price: 650000,
-    collection: "gara",
-    category: "Home",
-    description: "King-size bedspread in layered Gara tie-dye, a centrepiece for any bedroom",
-    image: "https://images.unsplash.com/photo-1616627561950-9f746e330187?w=400&h=500&fit=crop",
-  },
-  {
-    id: "gara-6",
-    name: "Gara Men's Shirt",
-    price: 280000,
-    collection: "gara",
-    category: "Shirt",
-    description: "Relaxed-fit men's shirt in classic Gara tie-dye with wooden buttons",
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "Hand-dyed cotton",
+    description:
+      "Soft, hand-dyed cotton piece crafted by Sierra Leonean artisans. A timeless everyday design.",
+    colors: ["Mix colors"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("yabom", 3),
   },
 
-  // Batik Collection
+  // ─── BATIK Collection ───
   {
-    id: "batik-1",
-    name: "Batik Maxi Dress",
-    price: 520000,
+    id: "aissatou-jumpsuit",
+    name: "Aissatou Jumpsuit",
+    priceUSD: 85,
+    collection: "batik",
+    category: "Jumpsuit",
+    fabric: "Hand batik cotton",
+    description:
+      "Relaxed-fit light-weight hand-batik jumpsuit with draft design. Three-day artisan process: hand batik, hand-dye, then hand-tailor.",
+    colors: ["Purple", "Green", "Blue", "Pink", "Orange"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("aissatou-jumpsuit", 4),
+  },
+  {
+    id: "ami-rap-dress",
+    name: "Ami Rap Dress",
+    priceUSD: 98,
     collection: "batik",
     category: "Dress",
-    description: "Full-length maxi dress in wax-resist batik with floral motifs",
-    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=500&fit=crop",
+    fabric: "Hand batik (Coligy) with silk",
+    description:
+      "Free-size hand-batik cotton rap dress mixed with light silk. Light-weight, flowing and crafted over three days by our artisans.",
+    colors: ["Purple", "Green", "Blue", "Pink", "Orange", "Yellow"],
+    sizes: ["Free Size (UK8–UK16)"],
+    images: imgs("ami-rap-dress", 4),
   },
   {
-    id: "batik-2",
-    name: "Batik Clutch Purse",
-    price: 150000,
+    id: "ariana-patch-dress",
+    name: "Ariana Patch Dress",
+    priceUSD: 49,
     collection: "batik",
-    category: "Bag",
-    description: "Compact evening clutch in hand-stamped batik with brass clasp",
-    image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "100% cotton — hand batik",
+    description:
+      "Relaxed-fit patch dress in a mix of four colours with draft, flower and straight-line coligy designs. Light-weight with movement.",
+    colors: ["4-color mix"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("ariana-patch-dress", 1),
   },
   {
-    id: "batik-3",
-    name: "Batik Palazzo Pants",
-    price: 350000,
+    id: "dija-shirt-dress",
+    name: "Dija Shirt Dress",
+    priceUSD: 85,
     collection: "batik",
-    category: "Pants",
-    description: "Wide-leg palazzo pants in bold batik print for effortless style",
-    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "Hand batik + hand-woven cloth",
+    description:
+      "Relaxed-fit hand-batik shirt dress tailored with Sierra Leonean hand-woven cloth detail. Light-weight with natural drape.",
+    colors: ["Purple", "Green", "Blue", "Pink", "Orange"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("dija-shirt-dress", 4),
   },
   {
-    id: "batik-4",
-    name: "Batik Table Runner",
-    price: 200000,
+    id: "isata-jacket-rap",
+    name: "Isata Rap Dress",
+    priceUSD: 98,
     collection: "batik",
-    category: "Home",
-    description: "Hand-crafted table runner featuring geometric batik patterns",
-    image: "https://images.unsplash.com/photo-1615529328331-f8917597711f?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "Hand batik",
+    description:
+      "Free-size rap dress that fits UK8–UK16 beautifully. Light-weight hand-batik with a mix of draft, flower and line coligy designs.",
+    colors: ["Orange & Purple", "Blue & Red", "Yellow & Pink"],
+    sizes: ["Free Size (UK8–UK16)"],
+    images: imgs("isata-jacket-rap", 4),
   },
   {
-    id: "batik-5",
-    name: "Batik Kimono Jacket",
-    price: 480000,
+    id: "iyekallay-dress",
+    name: "Iyekallay Dress",
+    priceUSD: 98,
     collection: "batik",
-    category: "Jacket",
-    description: "Lightweight kimono-style jacket in earthy batik tones",
-    image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "Hand batik + light silk",
+    description:
+      "Relaxed-fit hand-batik dress tailored with light silk. Draft, flower or straight-line designs — chosen at the artisan's hand.",
+    colors: ["Purple", "Green", "Blue", "Yellow", "Orange"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("iyekallay-dress", 4),
   },
   {
-    id: "batik-6",
-    name: "Batik Scarf",
-    price: 95000,
+    id: "marie-dress",
+    name: "Marie Dress",
+    priceUSD: 45,
     collection: "batik",
-    category: "Accessory",
-    description: "Soft cotton scarf with delicate batik patterns in warm earth tones",
-    image: "https://images.unsplash.com/photo-1601924921557-45e879e8e3c6?w=400&h=500&fit=crop",
+    category: "Dress",
+    fabric: "100% hand-batik cotton",
+    description:
+      "Relaxed-fit batik cotton dress with signature pineapple print. Light-weight and perfect for warm days.",
+    colors: ["Green", "Orange", "Red", "Pink", "Purple"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("marie-dress", 4),
+  },
+  {
+    id: "miriam-kimono",
+    name: "Miriam Kimono",
+    priceUSD: 62,
+    collection: "batik",
+    category: "Kimono",
+    fabric: "100% hand-batik cotton",
+    description:
+      "Relaxed-fit kimono with straight-line batik design and delicate embroidery. Light-weight with beautiful drape.",
+    colors: ["Pink", "Yellow", "Blue", "Green", "Orange", "Purple", "Lemon Green"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("miriam-kimono", 4),
+  },
+  {
+    id: "nenegalleh-boubou",
+    name: "Nenegalleh Boubou",
+    priceUSD: 117,
+    collection: "batik",
+    category: "Boubou",
+    fabric: "100% hand-batik cotton",
+    description:
+      "Free-size boubou gown with embroidery detail, crafted in hand-batik cotton. Elegant, light-weight and ceremony-ready.",
+    colors: [
+      "Yellow/Pink",
+      "Purple/Green",
+      "Grey",
+      "Grey/Red",
+      "Red",
+      "Purple",
+    ],
+    sizes: ["Free Size (UK8–UK18)"],
+    images: imgs("nenegalleh-boubou", 4),
+  },
+  {
+    id: "tutu-kaftan-patch",
+    name: "Tutu Kaftan (Patch)",
+    priceUSD: 45,
+    collection: "batik",
+    category: "Kaftan",
+    fabric: "100% hand-batik cotton",
+    description:
+      "Every-day batik kaftan in straight-line and draft designs. Free-size, 100% cotton, crafted over three days.",
+    colors: ["Mix colors"],
+    sizes: ["Free Size (UK8–UK16)"],
+    images: imgs("tutu-kaftan-patch", 4),
+  },
+  {
+    id: "zaza-pants-suit",
+    name: "Zaza Pants Suit",
+    priceUSD: 79,
+    collection: "batik",
+    category: "Pants Suit",
+    fabric: "100% hand-batik cotton",
+    description:
+      "Classic hand-batik cotton pants suit in straight-line, flower and draft designs. Suitable for the modern classic woman.",
+    colors: [
+      "Yellow",
+      "Orange",
+      "Blue",
+      "Lime Green",
+      "Purple",
+      "Pink",
+      "Mix colors",
+    ],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("zaza-pants-suit", 4),
   },
 
-  // Woven / Country Cloth Collection
+  // ─── WOVEN / COUNTRY CLOTH Collection ───
   {
-    id: "woven-1",
-    name: "Woven Shift Dress",
-    price: 580000,
-    collection: "woven",
-    category: "Dress",
-    description: "Structured shift dress in hand-woven country cloth with stripe detail",
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=500&fit=crop",
-  },
-  {
-    id: "woven-2",
-    name: "Woven Crossbody Bag",
-    price: 220000,
-    collection: "woven",
-    category: "Bag",
-    description: "Compact crossbody bag in woven cloth with adjustable leather strap",
-    image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=500&fit=crop",
-  },
-  {
-    id: "woven-3",
-    name: "Woven Throw Blanket",
-    price: 400000,
-    collection: "woven",
-    category: "Home",
-    description: "Cozy throw blanket in traditional country cloth weave patterns",
-    image: "https://images.unsplash.com/photo-1580301762395-21ce12d4bc4b?w=400&h=500&fit=crop",
-  },
-  {
-    id: "woven-4",
-    name: "Woven Blazer",
-    price: 620000,
+    id: "bunduka-jacket",
+    name: "Bunduka Jacket",
+    priceUSD: 153,
     collection: "woven",
     category: "Jacket",
-    description: "Tailored blazer in structured woven cloth with modern cut",
-    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=500&fit=crop",
+    fabric: "Leppi (Fulani cotton) + hand batik",
+    description:
+      "Relaxed-fit statement jacket — indigo Leppi sourced from Guinea, mixed with hand-batik cotton. Hand-wash to preserve the natural dye.",
+    colors: ["Indigo Blue mix (Yellow, Orange, Blue, Red, Pink)"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("bunduka-jacket", 4),
   },
   {
-    id: "woven-5",
-    name: "Woven Cap",
-    price: 85000,
+    id: "gbinti-jacket",
+    name: "Gbinti Jacket",
+    priceUSD: 153,
     collection: "woven",
-    category: "Accessory",
-    description: "Unisex cap in country cloth weave, perfect for sun protection with style",
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=400&h=500&fit=crop",
+    category: "Jacket",
+    fabric: "Sierra Leonean Contri Cloth + hand batik",
+    description:
+      "Statement jacket in Sierra Leonean hand-woven contri cloth mixed with hand-batik cotton. Relaxed fit with natural movement.",
+    colors: ["Yellow", "Orange", "Blue", "Red", "Pink mix"],
+    sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
+    images: imgs("gbinti-jacket", 4),
   },
   {
-    id: "woven-6",
-    name: "Woven Wide-Leg Trousers",
-    price: 380000,
+    id: "umu-leppi-top",
+    name: "Umu Leppi Top",
+    priceUSD: 45,
     collection: "woven",
-    category: "Pants",
-    description: "Relaxed wide-leg trousers in hand-woven cloth with drawstring waist",
-    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=500&fit=crop",
+    category: "Top",
+    fabric: "Leppi (Fulani cotton) — naturally dyed",
+    description:
+      "Warm, flexible cover made from Fulani leppi cloth, traditionally dyed with natural leaves. Perfect for cooler seasons.",
+    colors: ["Indigo Blue"],
+    sizes: ["Free Size (UK8–UK16)"],
+    images: imgs("umu-leppi-top", 2),
   },
 ];
 
-export function getProductsByCollection(collection: "gara" | "batik" | "woven"): Product[] {
+export function getProductsByCollection(
+  collection: "gara" | "batik" | "woven"
+): Product[] {
   return products.filter((p) => p.collection === collection);
+}
+
+export function getProductById(id: string): Product | undefined {
+  return products.find((p) => p.id === id);
 }

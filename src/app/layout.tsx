@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans, Cormorant_Garamond } from "next/font/google";
+import { Playfair_Display, DM_Sans, Cormorant_Garamond, Bagel_Fat_One } from "next/font/google";
 import { CartProvider } from "@/context/cart-context";
 import "./globals.css";
 
@@ -24,10 +24,17 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+const bagel = Bagel_Fat_One({
+  variable: "--font-logo",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Tesmaraneh — Ethical Fashion Rooted in West African Heritage",
+  title: "Tesmaraneh — Ethical Fashion for Women, Rooted in Sierra Leone",
   description:
-    "Sustainable, ethical fashion from Freetown, Sierra Leone. Timeless designs crafted with Gara tie-dye, batik, and woven cloth. Made with purpose.",
+    "A Sierra Leonean clothing brand creating beautiful, timeless designs for women. Handmade with Gara tie-dye, batik, and woven country cloth. Empowering women and artisans.",
 };
 
 export default function RootLayout({
@@ -38,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${dmSans.variable} ${cormorant.variable} antialiased`}
+      className={`${playfair.variable} ${dmSans.variable} ${cormorant.variable} ${bagel.variable} antialiased`}
     >
       <body>
         <CartProvider>{children}</CartProvider>

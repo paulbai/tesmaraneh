@@ -1,11 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingBag, Plus, Minus } from "lucide-react";
+import { X, ShoppingBag } from "lucide-react";
 import { getProductsByCollection, formatPrice, type Product } from "@/lib/products";
 import { useCart } from "@/context/cart-context";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 const collectionMeta = {
   gara: {
@@ -16,12 +17,12 @@ const collectionMeta = {
   batik: {
     title: "Batik Collection",
     subtitle: "Wax-resist dyed fabrics transformed into contemporary silhouettes",
-    gradient: "from-[var(--indigo)] to-[var(--indigo-light)]",
+    gradient: "from-[var(--charcoal)] to-[var(--indigo)]",
   },
   woven: {
     title: "Woven Cloth",
     subtitle: "Traditional country cloth hand-woven into modern statement pieces",
-    gradient: "from-[var(--forest)] to-[var(--forest-light)]",
+    gradient: "from-[var(--indigo)] to-[var(--ochre-light)]",
   },
 };
 
@@ -45,35 +46,37 @@ function ProductCard({ product }: { product: Product }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group bg-white rounded-[14px] sm:rounded-[20px] overflow-hidden shadow-sm border border-[var(--cream-dark)] hover:shadow-lg transition-all duration-500"
+      className="group bg-white rounded-[14px] sm:rounded-[20px] overflow-hidden shadow-sm border border-[var(--cream-dark)] hover:shadow-lg transition-all duration-500 flex flex-col"
     >
-      {/* Product image */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream-dark)]">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
-          sizes="(max-width: 640px) 45vw, (max-width: 768px) 50vw, 25vw"
-        />
-        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-          <span className="bg-white/90 backdrop-blur-sm text-[var(--charcoal)] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase">
-            {product.category}
-          </span>
+      {/* Product image - link to detail */}
+      <Link href={`/marketplace/${product.id}`} className="block">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream-dark)]">
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            sizes="(max-width: 640px) 45vw, (max-width: 768px) 50vw, 25vw"
+          />
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+            <span className="bg-white/90 backdrop-blur-sm text-[var(--charcoal)] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase">
+              {product.category}
+            </span>
+          </div>
         </div>
-      </div>
+      </Link>
 
       {/* Product info */}
-      <div className="p-3 sm:p-4 space-y-1.5 sm:space-y-3">
+      <div className="p-3 sm:p-4 space-y-1.5 sm:space-y-3 flex-1 flex flex-col">
         <h4 className="font-[family-name:var(--font-display)] text-sm sm:text-lg font-bold text-[var(--charcoal)] leading-tight">
           {product.name}
         </h4>
         <p className="font-[family-name:var(--font-body)] text-[10px] sm:text-xs text-[var(--warm-gray)] leading-relaxed line-clamp-2 hidden sm:block">
-          {product.description}
+          {product.fabric}
         </p>
-        <div className="flex items-center justify-between pt-0.5 sm:pt-1">
-          <span className="font-[family-name:var(--font-display)] text-base sm:text-xl font-bold text-[var(--terracotta)]">
-            {formatPrice(product.price)}
+        <div className="flex items-center justify-between pt-0.5 sm:pt-1 mt-auto">
+          <span className="font-[family-name:var(--font-display)] text-sm sm:text-lg font-bold text-[var(--terracotta)]">
+            {formatPrice(product.priceUSD)}
           </span>
         </div>
         <button
@@ -115,7 +118,6 @@ export function CollectionModal({ collection, onClose }: CollectionModalProps) {
     <AnimatePresence>
       {collection && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -125,7 +127,6 @@ export function CollectionModal({ collection, onClose }: CollectionModalProps) {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
           />
 
-          {/* Modal */}
           <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -133,7 +134,6 @@ export function CollectionModal({ collection, onClose }: CollectionModalProps) {
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="fixed inset-0 sm:inset-4 md:inset-8 lg:inset-12 bg-[var(--cream)] rounded-none sm:rounded-[28px] z-[61] overflow-hidden flex flex-col shadow-2xl"
           >
-            {/* Header */}
             <div
               className={`bg-gradient-to-r ${meta.gradient} px-4 sm:px-6 md:px-10 py-5 sm:py-8 flex items-center justify-between shrink-0`}
             >
@@ -141,7 +141,7 @@ export function CollectionModal({ collection, onClose }: CollectionModalProps) {
                 <h2 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl md:text-4xl font-black text-white truncate">
                   {meta.title}
                 </h2>
-                <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm text-white/60 mt-1 line-clamp-1">
+                <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm text-white/70 mt-1 line-clamp-1">
                   {meta.subtitle}
                 </p>
               </div>
@@ -171,23 +171,39 @@ export function CollectionModal({ collection, onClose }: CollectionModalProps) {
               </div>
             </div>
 
-            {/* Products grid */}
             <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-10">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                {collectionProducts.map((product, i) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
+              {collectionProducts.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="font-[family-name:var(--font-body)] text-[var(--warm-gray)]">
+                    No products yet in this collection.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                  {collectionProducts.map((product, i) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-8 sm:mt-12 flex justify-center">
+                <Link
+                  href="/marketplace"
+                  onClick={onClose}
+                  className="cursor-pointer inline-flex items-center gap-2 bg-[var(--charcoal)] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold hover:bg-[var(--terracotta)] transition-colors duration-300"
+                >
+                  View Full Marketplace
+                </Link>
               </div>
             </div>
 
-            {/* Footer with cart summary */}
             {totalItems > 0 && (
               <div className="shrink-0 border-t border-[var(--cream-dark)] bg-white px-4 sm:px-6 md:px-10 py-3 sm:py-4 flex items-center justify-between">
                 <p className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)]">
