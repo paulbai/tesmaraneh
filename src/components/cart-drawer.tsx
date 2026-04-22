@@ -49,6 +49,8 @@ export function CartDrawer() {
   const [form, setForm] = useState<CheckoutForm>(emptyForm);
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutForm, string>>>({});
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validate = () => {
     const e: Partial<Record<keyof CheckoutForm, string>> = {};
@@ -62,39 +64,84 @@ export function CartDrawer() {
     return Object.keys(e).length === 0;
   };
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     if (!validate()) return;
+    setSubmitError(null);
+    setSubmitting(true);
 
-    const summary = items
-      .map(
-        (i) =>
-          `${i.product.name}${i.size ? ` (${i.size})` : ""}${
-            i.color ? ` [${i.color}]` : ""
-          } x${i.quantity}`
-      )
-      .join("; ");
+    try {
+      // 1. Persist the order server-side FIRST so we have a record even if
+      //    the shopper abandons payment. The server re-prices from the
+      //    canonical catalog and issues the reference we hand to Flot.
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: {
+            name: form.name,
+            phone: form.phone,
+            address: form.address,
+            city: form.city,
+          },
+          items: items.map((i) => ({
+            productId: i.product.id,
+            quantity: i.quantity,
+            size: i.size ?? null,
+            color: i.color ?? null,
+          })),
+        }),
+      });
 
-    const amountSLL = toSLL(totalPriceUSD);
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(data.error ?? "Unable to create order");
+      }
 
-    // Send common aliases so Flot picks up the total regardless of the
-    // param name its merchant page expects (amount / total / price).
-    const params = new URLSearchParams({
-      amount: amountSLL.toString(),
-      total: amountSLL.toString(),
-      price: amountSLL.toString(),
-      currency: "SLL",
-      merchant: "tesmaraneh",
-      reference: `TES-${Date.now()}`,
-      description: `Tesmaraneh order — ${totalItems} item${
-        totalItems === 1 ? "" : "s"
-      }`,
-      customer_name: form.name,
-      customer_phone: form.phone,
-      customer_address: `${form.address}, ${form.city}`,
-      items: summary,
-    });
+      const { reference, totalSll } = (await res.json()) as {
+        reference: string;
+        totalSll: number;
+      };
 
-    setCheckoutUrl(`${CHECKOUT_URL}?${params.toString()}`);
+      // 2. Build the Flot URL with the server-issued reference and the
+      //    authoritative SLL total.
+      const summary = items
+        .map(
+          (i) =>
+            `${i.product.name}${i.size ? ` (${i.size})` : ""}${
+              i.color ? ` [${i.color}]` : ""
+            } x${i.quantity}`
+        )
+        .join("; ");
+
+      const params = new URLSearchParams({
+        amount: totalSll.toString(),
+        total: totalSll.toString(),
+        price: totalSll.toString(),
+        currency: "SLL",
+        merchant: "tesmaraneh",
+        reference,
+        description: `Tesmaraneh order — ${totalItems} item${
+          totalItems === 1 ? "" : "s"
+        }`,
+        customer_name: form.name,
+        customer_phone: form.phone,
+        customer_address: `${form.address}, ${form.city}`,
+        items: summary,
+      });
+
+      setCheckoutUrl(`${CHECKOUT_URL}?${params.toString()}`);
+    } catch (err) {
+      console.error("[checkout] order creation failed:", err);
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const closeCheckout = () => setCheckoutUrl(null);
@@ -374,12 +421,23 @@ export function CartDrawer() {
                   </div>
                 </div>
 
-                <div className="shrink-0 border-t border-[var(--cream-dark)] bg-[var(--cream)] px-5 sm:px-6 py-4">
+                <div className="shrink-0 border-t border-[var(--cream-dark)] bg-[var(--cream)] px-5 sm:px-6 py-4 space-y-3">
+                  {submitError && (
+                    <p
+                      role="alert"
+                      className="text-xs font-[family-name:var(--font-body)] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2"
+                    >
+                      {submitError}
+                    </p>
+                  )}
                   <button
                     onClick={handleProceed}
-                    className="cursor-pointer w-full flex items-center justify-center gap-2 bg-[var(--terracotta)] text-white py-4 rounded-full text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-colors duration-300 shadow-lg"
+                    disabled={submitting}
+                    className="cursor-pointer w-full flex items-center justify-center gap-2 bg-[var(--terracotta)] text-white py-4 rounded-full text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-colors duration-300 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Pay {formatPrice(totalPriceUSD)}
+                    {submitting
+                      ? "Creating order…"
+                      : `Pay ${formatPrice(totalPriceUSD)}`}
                   </button>
                 </div>
               </>

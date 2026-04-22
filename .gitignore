@@ -45,3 +45,4 @@ Merchant Website Intake Form.csv*
 
 # Client source materials (processed copies go in public/)
 client-assets/
+.env*.local
