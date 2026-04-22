@@ -415,8 +415,17 @@ export function CartDrawer() {
                   <div className="flex items-start gap-2 text-xs text-[var(--warm-gray)] font-[family-name:var(--font-body)]">
                     <ShieldCheck size={14} className="shrink-0 mt-0.5 text-[var(--forest)]" />
                     <span>
-                      Your payment is processed securely. You&rsquo;ll receive a
-                      confirmation once the transaction is complete.
+                      Your payment is processed securely by{" "}
+                      <a
+                        href="https://www.flotme.ai/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-[var(--forest)]/40 underline-offset-2 hover:text-[var(--charcoal)] hover:decoration-[var(--forest)] transition-colors"
+                      >
+                        Flot
+                      </a>
+                      . You&rsquo;ll receive a confirmation once the
+                      transaction is complete.
                     </span>
                   </div>
                 </div>
