@@ -120,7 +120,7 @@ export default function MarketplacePage() {
 
       <main className="bg-[var(--cream)] min-h-screen pt-20 sm:pt-24 pb-24">
         {/* Hero header */}
-        <section className="relative overflow-hidden bg-[var(--charcoal)] text-white">
+        <section className="relative overflow-hidden bg-[var(--terracotta)] text-white">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 py-12 sm:py-16 md:py-20 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -128,13 +128,13 @@ export default function MarketplacePage() {
               transition={{ duration: 0.8 }}
               className="max-w-2xl"
             >
-              <span className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-[0.3em] uppercase text-[var(--ochre)] font-semibold block mb-4">
+              <span className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-[0.3em] uppercase text-white/80 font-semibold block mb-4">
                 Marketplace
               </span>
               <h1 className="font-[family-name:var(--font-display)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] mb-6">
-                SHOP THE <span className="text-[var(--terracotta)]">COLLECTION</span>
+                SHOP THE <span className="text-[var(--charcoal)]">COLLECTION</span>
               </h1>
-              <p className="font-[family-name:var(--font-body)] text-sm sm:text-base text-white/60 max-w-xl leading-relaxed">
+              <p className="font-[family-name:var(--font-body)] text-sm sm:text-base text-white/85 max-w-xl leading-relaxed">
                 Every piece is hand-dyed, hand-batiked or hand-woven in Sierra
                 Leone. Made by women, for women, with care.
               </p>

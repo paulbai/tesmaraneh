@@ -544,7 +544,7 @@ function MarqueeStrip() {
   ];
 
   return (
-    <div className="bg-[var(--charcoal)] py-4 overflow-hidden">
+    <div className="bg-[var(--terracotta)] py-4 overflow-hidden">
       <div className="animate-marquee flex whitespace-nowrap">
         {[...items, ...items, ...items, ...items].map((item, i) => (
           <span
@@ -625,7 +625,7 @@ function About() {
             <AnimatedSection delay={0.2}>
               <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] text-[var(--charcoal)]">
                 A Stylish Journey Toward a{" "}
-                <span className="text-[var(--terracotta)]">Verdant</span>{" "}
+                <span className="text-[var(--terracotta)]">Better</span>{" "}
                 Tomorrow
               </h2>
             </AnimatedSection>
@@ -743,12 +743,12 @@ function Collections({
   return (
     <section
       id="collections"
-      className="bg-[var(--charcoal)] py-16 sm:py-24 md:py-36 relative grain-overlay"
+      className="bg-[var(--terracotta)] py-16 sm:py-24 md:py-36 relative grain-overlay"
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 mb-10 sm:mb-16">
           <AnimatedSection>
-            <span className="font-[family-name:var(--font-body)] text-sm tracking-[0.3em] uppercase text-[var(--ochre)] font-semibold block mb-4">
+            <span className="font-[family-name:var(--font-body)] text-sm tracking-[0.3em] uppercase text-white/70 font-semibold block mb-4">
               What We Create
             </span>
             <h2 className="font-[family-name:var(--font-display)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[0.95]">
@@ -759,7 +759,7 @@ function Collections({
           </AnimatedSection>
 
           <AnimatedSection delay={0.2}>
-            <p className="text-lg text-white/50 max-w-md font-[family-name:var(--font-body)] font-light leading-relaxed">
+            <p className="text-lg text-white/80 max-w-md font-[family-name:var(--font-body)] font-light leading-relaxed">
               Each collection celebrates a unique West African textile tradition,
               reimagined for the modern world.
             </p>
@@ -981,7 +981,7 @@ function Values() {
           <AnimatedSection delay={0.2}>
             <p className="mt-6 text-lg text-[var(--warm-gray)] max-w-2xl mx-auto font-[family-name:var(--font-body)] font-light leading-relaxed">
               Every Tesmaraneh piece is crafted with care and eco-consciousness.
-              A stylish journey toward a verdant tomorrow.
+              A stylish journey toward a better tomorrow.
             </p>
           </AnimatedSection>
         </div>
@@ -1052,9 +1052,11 @@ function Impact() {
 
               <AnimatedSection delay={0.1}>
                 <h2 className="font-[family-name:var(--font-display)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[0.95]">
-                  MADE WITH
+                  HANDCRAFTED
                   <br />
-                  PURPOSE
+                  IN THE PROVINCES
+                  <br />
+                  OF SIERRA LEONE
                 </h2>
               </AnimatedSection>
 
@@ -1252,7 +1254,7 @@ function Footer() {
   return (
     <footer
       id="contact"
-      className="bg-[var(--charcoal)] text-white pt-16 sm:pt-24 pb-8 relative grain-overlay overflow-hidden"
+      className="bg-[var(--terracotta)] text-white pt-16 sm:pt-24 pb-8 relative grain-overlay overflow-hidden"
     >
       {/* Decorative logo background */}
       <div
