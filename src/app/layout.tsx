@@ -31,15 +31,13 @@ const bagel = Bagel_Fat_One({
   display: "swap",
 });
 
-// Pull the canonical site URL from the env var Vercel injects automatically
-// (`NEXT_PUBLIC_VERCEL_URL`). Local dev falls back to localhost. This is
-// required for absolute OG image URLs — relative paths don't render in
-// link unfurlers (Slack, iMessage, Twitter, etc.).
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  ? process.env.NEXT_PUBLIC_SITE_URL
-  : process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-  : "https://tesmaraneh.vercel.app";
+// Canonical site URL used for absolute OG image URLs. Hard-coded to the
+// custom domain — `NEXT_PUBLIC_VERCEL_URL` resolves to the per-deployment
+// hostname (e.g. tesmaraneh-abc123-team.vercel.app), which is gated by
+// Vercel deployment auth and therefore unreachable by link unfurlers.
+// Override via `NEXT_PUBLIC_SITE_URL` if the canonical host changes.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.tesmaranehclothing.com";
 
 const TITLE = "Tesmaraneh — Ethical Fashion, Made in Sierra Leone";
 const DESCRIPTION =
