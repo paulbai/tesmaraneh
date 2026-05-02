@@ -118,42 +118,17 @@ export default async function OpengraphImage() {
           </div>
         </div>
 
-        {/* Footer row */}
+        {/* Footer strapline */}
         <div
           style={{
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
             fontFamily: "sans-serif",
+            fontSize: 28,
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.92)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 6,
-              fontSize: 26,
-              color: "rgba(255,255,255,0.92)",
-              maxWidth: 720,
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>
-              Hand-batiked, hand-tailored.
-            </div>
-            <div style={{ color: "rgba(255,255,255,0.78)" }}>
-              SS26 Summer Collection — in stock now.
-            </div>
-          </div>
-          <div
-            style={{
-              fontSize: 22,
-              letterSpacing: "0.1em",
-              color: "rgba(255,255,255,0.85)",
-              fontWeight: 500,
-            }}
-          >
-            tesmaraneh.vercel.app
-          </div>
+          Hand-batiked, hand-tailored.
         </div>
       </div>
     ),
