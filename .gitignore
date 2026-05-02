@@ -46,3 +46,8 @@ Merchant Website Intake Form.csv*
 # Client source materials (processed copies go in public/)
 client-assets/
 .env*.local
+
+# Original camera-roll images and price docs for the SS26 collection.
+# Processed copies live under public/products/ss26-* with normalized
+# filenames and are committed.
+public/products/SS26-Summer Collection/

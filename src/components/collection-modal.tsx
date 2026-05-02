@@ -9,25 +9,30 @@ import Image from "next/image";
 import Link from "next/link";
 
 const collectionMeta = {
+  ss26: {
+    title: "SS26 Summer",
+    subtitle: "Nineteen new pieces — in stock now from the provinces of Sierra Leone",
+    gradient: "from-[var(--ochre)] to-[var(--terracotta-light)]",
+  },
   gara: {
-    title: "Gara Tie-Dye",
-    subtitle: "Ancient dyeing techniques creating unique, flowing patterns",
+    title: "Gara Tie-Dye (Archive)",
+    subtitle: "Ancient dyeing techniques — sold out, available on request",
     gradient: "from-[var(--terracotta)] to-[var(--ochre)]",
   },
   batik: {
-    title: "Batik Collection",
-    subtitle: "Wax-resist dyed fabrics transformed into contemporary silhouettes",
+    title: "Batik Collection (Archive)",
+    subtitle: "Wax-resist dyed fabrics — sold out, available on request",
     gradient: "from-[var(--charcoal)] to-[var(--indigo)]",
   },
   woven: {
-    title: "Woven Cloth",
-    subtitle: "Traditional country cloth hand-woven into modern statement pieces",
+    title: "Woven Cloth (Archive)",
+    subtitle: "Traditional country cloth — sold out, available on request",
     gradient: "from-[var(--indigo)] to-[var(--ochre-light)]",
   },
 };
 
 interface CollectionModalProps {
-  collection: "gara" | "batik" | "woven" | null;
+  collection: "ss26" | "gara" | "batik" | "woven" | null;
   onClose: () => void;
 }
 
@@ -37,6 +42,7 @@ function ProductCard({ product }: { product: Product }) {
   const cartItem = items.find((i) => i.product.id === product.id);
 
   const handleAdd = () => {
+    if (!product.inStock) return;
     addToCart(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
@@ -55,13 +61,26 @@ function ProductCard({ product }: { product: Product }) {
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            className={`object-cover group-hover:scale-105 transition-transform duration-700 ${
+              !product.inStock ? "saturate-50" : ""
+            }`}
             sizes="(max-width: 640px) 45vw, (max-width: 768px) 50vw, 25vw"
           />
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
             <span className="bg-white/90 backdrop-blur-sm text-[var(--charcoal)] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase">
               {product.category}
             </span>
+          </div>
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+            {product.inStock ? (
+              <span className="bg-emerald-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase">
+                In Stock
+              </span>
+            ) : (
+              <span className="bg-stone-700/90 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase">
+                Sold Out
+              </span>
+            )}
           </div>
         </div>
       </Link>
@@ -75,32 +94,47 @@ function ProductCard({ product }: { product: Product }) {
           {product.fabric}
         </p>
         <div className="flex items-center justify-between pt-0.5 sm:pt-1 mt-auto">
-          <span className="font-[family-name:var(--font-display)] text-sm sm:text-lg font-bold text-[var(--terracotta)]">
+          <span
+            className={`font-[family-name:var(--font-display)] text-sm sm:text-lg font-bold ${
+              product.inStock
+                ? "text-[var(--terracotta)]"
+                : "text-stone-400 line-through"
+            }`}
+          >
             {formatPrice(product.priceUSD)}
           </span>
         </div>
-        <button
-          onClick={handleAdd}
-          className={`cursor-pointer w-full flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide transition-all duration-300 ${
-            added
-              ? "bg-[var(--forest)] text-white"
-              : "bg-[var(--charcoal)] text-white hover:bg-[var(--terracotta)]"
-          }`}
-        >
-          {added ? (
-            <>Added!</>
-          ) : (
-            <>
-              <ShoppingBag size={14} />
-              Add to Cart
-              {cartItem && cartItem.quantity > 0 && (
-                <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                  {cartItem.quantity}
-                </span>
-              )}
-            </>
-          )}
-        </button>
+        {product.inStock ? (
+          <button
+            onClick={handleAdd}
+            className={`cursor-pointer w-full flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide transition-all duration-300 ${
+              added
+                ? "bg-[var(--forest)] text-white"
+                : "bg-[var(--charcoal)] text-white hover:bg-[var(--terracotta)]"
+            }`}
+          >
+            {added ? (
+              <>Added!</>
+            ) : (
+              <>
+                <ShoppingBag size={14} />
+                Add to Cart
+                {cartItem && cartItem.quantity > 0 && (
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                    {cartItem.quantity}
+                  </span>
+                )}
+              </>
+            )}
+          </button>
+        ) : (
+          <Link
+            href={`/marketplace/${product.id}`}
+            className="cursor-pointer w-full flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide bg-stone-100 text-stone-500 hover:bg-stone-200 transition-colors"
+          >
+            View details
+          </Link>
+        )}
       </div>
     </motion.div>
   );

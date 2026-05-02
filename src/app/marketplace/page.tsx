@@ -1,22 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ShoppingBag, Filter, Check } from "lucide-react";
-import { products, formatPrice, type Product } from "@/lib/products";
+import {
+  products,
+  formatPrice,
+  COLLECTION_LABELS,
+  type Product,
+  type Collection,
+} from "@/lib/products";
 import { useCart } from "@/context/cart-context";
 import { SiteNav } from "@/components/site-nav";
 import { CartDrawer } from "@/components/cart-drawer";
 
-type Filter = "all" | "gara" | "batik" | "woven";
+type Filter = "ss26" | "all" | "gara" | "batik" | "woven";
 
-const filters: { key: Filter; label: string; hint: string }[] = [
+const filters: { key: Filter; label: string; hint: string; archive?: boolean }[] = [
+  { key: "ss26", label: "SS26 Summer", hint: "In stock now" },
   { key: "all", label: "All", hint: "Every piece" },
-  { key: "gara", label: "Gara Tie-Dye", hint: "Hand-dyed" },
-  { key: "batik", label: "Batik", hint: "Wax-resist" },
-  { key: "woven", label: "Woven Cloth", hint: "Country / Leppi" },
+  { key: "gara", label: "Gara Tie-Dye", hint: "Archive", archive: true },
+  { key: "batik", label: "Batik", hint: "Archive", archive: true },
+  { key: "woven", label: "Woven Cloth", hint: "Archive", archive: true },
 ];
 
 function ProductCard({ product }: { product: Product }) {
@@ -27,6 +34,7 @@ function ProductCard({ product }: { product: Product }) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!product.inStock) return;
     addToCart(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
@@ -36,7 +44,9 @@ function ProductCard({ product }: { product: Product }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group bg-white rounded-[16px] sm:rounded-[22px] overflow-hidden shadow-sm border border-[var(--cream-dark)] hover:shadow-xl transition-all duration-500 flex flex-col"
+      className={`group bg-white rounded-[16px] sm:rounded-[22px] overflow-hidden shadow-sm border border-[var(--cream-dark)] hover:shadow-xl transition-all duration-500 flex flex-col ${
+        !product.inStock ? "opacity-90" : ""
+      }`}
     >
       <Link href={`/marketplace/${product.id}`} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream-dark)]">
@@ -44,20 +54,37 @@ function ProductCard({ product }: { product: Product }) {
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            className={`object-cover group-hover:scale-105 transition-transform duration-700 ${
+              !product.inStock ? "saturate-50" : ""
+            }`}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1.5">
             <span className="bg-white/90 backdrop-blur-sm text-[var(--charcoal)] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase">
               {product.category}
             </span>
-            <span className="bg-[var(--charcoal)]/80 backdrop-blur-sm text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] font-[family-name:var(--font-body)] tracking-wider uppercase">
-              {product.collection === "gara"
-                ? "Gara"
-                : product.collection === "batik"
-                ? "Batik"
-                : "Woven"}
+            <span
+              className={`backdrop-blur-sm px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] font-[family-name:var(--font-body)] tracking-wider uppercase ${
+                product.collection === "ss26"
+                  ? "bg-[var(--terracotta)] text-white"
+                  : "bg-[var(--charcoal)]/80 text-white"
+              }`}
+            >
+              {COLLECTION_LABELS[product.collection]}
             </span>
+          </div>
+
+          {/* Stock pill — top right */}
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+            {product.inStock ? (
+              <span className="bg-emerald-500 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase shadow-sm">
+                In Stock
+              </span>
+            ) : (
+              <span className="bg-stone-700/90 text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase shadow-sm">
+                Sold Out
+              </span>
+            )}
           </div>
         </div>
       </Link>
@@ -72,47 +99,78 @@ function ProductCard({ product }: { product: Product }) {
           {product.fabric}
         </p>
         <div className="flex items-center justify-between pt-1 mt-auto">
-          <span className="font-[family-name:var(--font-display)] text-base sm:text-xl font-bold text-[var(--terracotta)]">
+          <span
+            className={`font-[family-name:var(--font-display)] text-base sm:text-xl font-bold ${
+              product.inStock
+                ? "text-[var(--terracotta)]"
+                : "text-stone-400 line-through"
+            }`}
+          >
             {formatPrice(product.priceUSD)}
           </span>
         </div>
-        <button
-          onClick={handleAdd}
-          className={`cursor-pointer w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide transition-all duration-300 ${
-            added
-              ? "bg-[var(--forest)] text-white"
-              : "bg-[var(--charcoal)] text-white hover:bg-[var(--terracotta)]"
-          }`}
-        >
-          {added ? (
-            <>
-              <Check size={14} /> Added!
-            </>
-          ) : (
-            <>
-              <ShoppingBag size={14} />
-              Add to Cart
-              {cartItem && cartItem.quantity > 0 && (
-                <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                  {cartItem.quantity}
-                </span>
-              )}
-            </>
-          )}
-        </button>
+        {product.inStock ? (
+          <button
+            onClick={handleAdd}
+            className={`cursor-pointer w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide transition-all duration-300 ${
+              added
+                ? "bg-[var(--forest)] text-white"
+                : "bg-[var(--charcoal)] text-white hover:bg-[var(--terracotta)]"
+            }`}
+          >
+            {added ? (
+              <>
+                <Check size={14} /> Added!
+              </>
+            ) : (
+              <>
+                <ShoppingBag size={14} />
+                Add to Cart
+                {cartItem && cartItem.quantity > 0 && (
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                    {cartItem.quantity}
+                  </span>
+                )}
+              </>
+            )}
+          </button>
+        ) : (
+          <Link
+            href={`/marketplace/${product.id}`}
+            className="cursor-pointer w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold tracking-wide bg-stone-100 text-stone-500 hover:bg-stone-200 transition-colors"
+          >
+            View details
+          </Link>
+        )}
       </div>
     </motion.div>
   );
 }
 
 export default function MarketplacePage() {
-  const [activeFilter, setActiveFilter] = useState<Filter>("all");
+  // Default to SS26 so the in-stock collection is the first thing
+  // customers land on. They can switch to "All" or to an archive.
+  const [activeFilter, setActiveFilter] = useState<Filter>("ss26");
   const { setIsCartOpen, totalItems } = useCart();
 
-  const filtered =
-    activeFilter === "all"
-      ? products
-      : products.filter((p) => p.collection === activeFilter);
+  const filtered = useMemo(() => {
+    let list: Product[];
+    if (activeFilter === "all") {
+      list = products;
+    } else {
+      list = products.filter(
+        (p) => p.collection === (activeFilter as Collection)
+      );
+    }
+    // Always surface in-stock first, then sold-out — preserve the
+    // catalog order within each group.
+    return [
+      ...list.filter((p) => p.inStock),
+      ...list.filter((p) => !p.inStock),
+    ];
+  }, [activeFilter]);
+
+  const inStockCount = filtered.filter((p) => p.inStock).length;
 
   return (
     <>
@@ -129,14 +187,16 @@ export default function MarketplacePage() {
               className="max-w-2xl"
             >
               <span className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-[0.3em] uppercase text-white/80 font-semibold block mb-4">
-                Marketplace
+                SS26 — In Stock Now
               </span>
               <h1 className="font-[family-name:var(--font-display)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] mb-6">
-                SHOP THE <span className="text-[var(--charcoal)]">COLLECTION</span>
+                THE SUMMER{" "}
+                <span className="text-[var(--charcoal)]">COLLECTION</span>
               </h1>
               <p className="font-[family-name:var(--font-body)] text-sm sm:text-base text-white/85 max-w-xl leading-relaxed">
-                Every piece is hand-dyed, hand-batiked or hand-woven in Sierra
-                Leone. Made by women, for women, with care.
+                Nineteen new pieces for SS26 — hand-batiked, hand-tailored,
+                made in the provinces of Sierra Leone. Previous collections
+                are sold out but remain in the archive below.
               </p>
             </motion.div>
           </div>
@@ -178,6 +238,8 @@ export default function MarketplacePage() {
                   className={`cursor-pointer whitespace-nowrap px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-[family-name:var(--font-body)] font-semibold transition-all duration-300 ${
                     activeFilter === f.key
                       ? "bg-[var(--charcoal)] text-white"
+                      : f.archive
+                      ? "bg-white text-stone-500 border border-[var(--cream-dark)] hover:border-[var(--terracotta)]"
                       : "bg-white text-[var(--charcoal)] border border-[var(--cream-dark)] hover:border-[var(--terracotta)]"
                   }`}
                 >
@@ -187,7 +249,11 @@ export default function MarketplacePage() {
             </div>
             <div className="ml-auto shrink-0 hidden sm:block">
               <span className="text-xs font-[family-name:var(--font-body)] text-[var(--warm-gray)]">
-                {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
+                {filtered.length}{" "}
+                {filtered.length === 1 ? "piece" : "pieces"}
+                {inStockCount > 0 && inStockCount !== filtered.length && (
+                  <> · {inStockCount} in stock</>
+                )}
               </span>
             </div>
           </div>

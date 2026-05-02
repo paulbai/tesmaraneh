@@ -13,7 +13,12 @@ import {
   Shirt,
   ShieldCheck,
 } from "lucide-react";
-import { getProductById, products, formatPrice } from "@/lib/products";
+import {
+  getProductById,
+  products,
+  formatPrice,
+  COLLECTION_LABELS,
+} from "@/lib/products";
 import { useCart } from "@/context/cart-context";
 import { SiteNav } from "@/components/site-nav";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -34,14 +39,10 @@ export default function ProductDetailPage({
 
   if (!product) return notFound();
 
-  const collectionLabel =
-    product.collection === "gara"
-      ? "Gara Tie-Dye"
-      : product.collection === "batik"
-      ? "Batik"
-      : "Woven Cloth";
+  const collectionLabel = COLLECTION_LABELS[product.collection];
 
   const handleAdd = () => {
+    if (!product.inStock) return;
     for (let i = 0; i < qty; i++) {
       addToCart(product, {
         size: size || product.sizes[0],
@@ -53,12 +54,17 @@ export default function ProductDetailPage({
   };
 
   const handleBuyNow = () => {
+    if (!product.inStock) return;
     handleAdd();
     setTimeout(() => setIsCartOpen(true), 200);
   };
 
+  // Surface SS26 (in-stock) pieces in "you may also love" — never push
+  // sold-out archive items as recommendations.
   const related = products
-    .filter((p) => p.collection === product.collection && p.id !== product.id)
+    .filter(
+      (p) => p.id !== product.id && p.inStock
+    )
     .slice(0, 4);
 
   return (
@@ -130,9 +136,20 @@ export default function ProductDetailPage({
             {/* Info */}
             <div className="space-y-5 sm:space-y-6 md:sticky md:top-24 md:self-start">
               <div>
-                <span className="inline-block font-[family-name:var(--font-body)] text-xs tracking-[0.3em] uppercase text-[var(--terracotta)] font-bold mb-3">
-                  {collectionLabel} · {product.category}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                  <span className="inline-block font-[family-name:var(--font-body)] text-xs tracking-[0.3em] uppercase text-[var(--terracotta)] font-bold">
+                    {collectionLabel} · {product.category}
+                  </span>
+                  {product.inStock ? (
+                    <span className="inline-flex items-center bg-emerald-500 text-white px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase">
+                      In Stock
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center bg-stone-700 text-white px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase">
+                      Sold Out
+                    </span>
+                  )}
+                </div>
                 <h1 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[var(--charcoal)] leading-[1.05] mb-4">
                   {product.name}
                 </h1>
@@ -142,7 +159,13 @@ export default function ProductDetailPage({
               </div>
 
               <div className="flex items-center gap-4">
-                <span className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-black text-[var(--terracotta)]">
+                <span
+                  className={`font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-black ${
+                    product.inStock
+                      ? "text-[var(--terracotta)]"
+                      : "text-stone-400 line-through"
+                  }`}
+                >
                   {formatPrice(product.priceUSD)}
                 </span>
                 <span className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)]">
@@ -229,32 +252,53 @@ export default function ProductDetailPage({
               </div>
 
               {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
-                  onClick={handleAdd}
-                  className={`cursor-pointer flex-1 inline-flex items-center justify-center gap-2 py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide transition-all duration-300 ${
-                    added
-                      ? "bg-[var(--forest)] text-white"
-                      : "bg-[var(--charcoal)] text-white hover:bg-[var(--charcoal-soft)]"
-                  }`}
-                >
-                  {added ? (
-                    <>
-                      <Check size={16} /> Added to cart
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag size={16} /> Add to Cart
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={handleBuyNow}
-                  className="cursor-pointer flex-1 inline-flex items-center justify-center gap-2 bg-[var(--terracotta)] text-white py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-all duration-300 shadow-lg"
-                >
-                  Buy Now
-                </button>
-              </div>
+              {product.inStock ? (
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    onClick={handleAdd}
+                    className={`cursor-pointer flex-1 inline-flex items-center justify-center gap-2 py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide transition-all duration-300 ${
+                      added
+                        ? "bg-[var(--forest)] text-white"
+                        : "bg-[var(--charcoal)] text-white hover:bg-[var(--charcoal-soft)]"
+                    }`}
+                  >
+                    {added ? (
+                      <>
+                        <Check size={16} /> Added to cart
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag size={16} /> Add to Cart
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    className="cursor-pointer flex-1 inline-flex items-center justify-center gap-2 bg-[var(--terracotta)] text-white py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-all duration-300 shadow-lg"
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-2 space-y-3">
+                  <div className="rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4">
+                    <p className="font-[family-name:var(--font-body)] text-sm font-semibold text-stone-800">
+                      This piece is sold out
+                    </p>
+                    <p className="font-[family-name:var(--font-body)] text-xs text-stone-600 mt-1 leading-relaxed">
+                      It&rsquo;s part of our archive. Browse the SS26 Summer
+                      Collection for pieces in stock now — or message us on
+                      Instagram about a custom remake.
+                    </p>
+                  </div>
+                  <Link
+                    href="/marketplace"
+                    className="cursor-pointer w-full inline-flex items-center justify-center gap-2 bg-[var(--terracotta)] text-white py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta-dark)] transition-all duration-300 shadow-lg"
+                  >
+                    Shop SS26 Collection →
+                  </Link>
+                </div>
+              )}
 
               {/* Trust badges */}
               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--cream-dark)]">

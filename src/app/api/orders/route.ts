@@ -75,8 +75,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Re-price every item server-side from the canonical product catalog.
-  // Never trust the client to send correct prices.
+  // Re-price every item server-side from the canonical product catalog
+  // and reject anything from the sold-out archive. Never trust the client.
   const resolved = [];
   for (const line of body.items) {
     const product = getProductById(line.productId);
@@ -84,6 +84,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: `Unknown product: ${line.productId}` },
         { status: 400 }
+      );
+    }
+    if (!product.inStock) {
+      return NextResponse.json(
+        {
+          error: `${product.name} is sold out. Please remove it from your cart.`,
+        },
+        { status: 409 }
       );
     }
     const qty = Math.max(1, Math.min(99, Math.floor(line.quantity ?? 1)));

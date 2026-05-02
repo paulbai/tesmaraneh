@@ -705,15 +705,27 @@ function About() {
 function Collections({
   onCollectionClick,
 }: {
-  onCollectionClick: (collection: "gara" | "batik" | "woven") => void;
+  onCollectionClick: (
+    collection: "ss26" | "gara" | "batik" | "woven"
+  ) => void;
 }) {
   const collections: {
     name: string;
     description: string;
     color: string;
-    key: "gara" | "batik" | "woven";
+    key: "ss26" | "gara" | "batik" | "woven";
     preview: string;
+    badge?: string;
   }[] = [
+    {
+      name: "SS26 Summer",
+      key: "ss26",
+      description:
+        "Nineteen new pieces — hand-batiked, hand-tailored, in stock now from the provinces of Sierra Leone",
+      color: "from-[var(--ochre)] to-[var(--terracotta-light)]",
+      preview: "/products/ss26-aisha/1.jpg",
+      badge: "In Stock",
+    },
     {
       name: "Gara Tie-Dye",
       key: "gara",
@@ -721,6 +733,7 @@ function Collections({
         "Ancient dyeing techniques creating unique, flowing patterns on every piece",
       color: "from-[var(--terracotta)] to-[var(--ochre)]",
       preview: "/products/mabel-dress/1.jpg",
+      badge: "Archive",
     },
     {
       name: "Batik Collection",
@@ -729,6 +742,7 @@ function Collections({
         "Wax-resist dyed fabrics transformed into contemporary silhouettes",
       color: "from-[var(--indigo)] to-[var(--indigo-light)]",
       preview: "/products/miriam-kimono/1.jpg",
+      badge: "Archive",
     },
     {
       name: "Woven Cloth",
@@ -737,6 +751,7 @@ function Collections({
         "Traditional country cloth hand-woven into modern statement pieces",
       color: "from-[var(--forest)] to-[var(--forest-light)]",
       preview: "/products/gbinti-jacket/1.jpg",
+      badge: "Archive",
     },
   ];
 
@@ -766,7 +781,7 @@ function Collections({
           </AnimatedSection>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
           {collections.map((item, i) => (
             <AnimatedSection key={item.name} delay={i * 0.15}>
               <div
@@ -781,6 +796,20 @@ function Collections({
                 <div
                   className={`aspect-[4/3] sm:aspect-[3/4] rounded-[20px] sm:rounded-[28px] bg-gradient-to-br ${item.color} overflow-hidden relative shadow-lg group-hover:shadow-2xl transition-shadow duration-500`}
                 >
+                  {/* Stock badge */}
+                  {item.badge && (
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-[family-name:var(--font-body)] font-semibold tracking-wider uppercase shadow-sm ${
+                          item.key === "ss26"
+                            ? "bg-emerald-500 text-white"
+                            : "bg-stone-700/90 text-white"
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    </div>
+                  )}
                   {/* Preview image */}
                   <Image
                     src={item.preview}
@@ -1426,7 +1455,7 @@ function Footer() {
 /* ─── MAIN PAGE ─── */
 export default function Home() {
   const [activeCollection, setActiveCollection] = useState<
-    "gara" | "batik" | "woven" | null
+    "ss26" | "gara" | "batik" | "woven" | null
   >(null);
 
   return (

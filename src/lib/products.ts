@@ -1,14 +1,19 @@
+export type Collection = "ss26" | "gara" | "batik" | "woven";
+
 export interface Product {
   id: string;
   name: string;
   priceUSD: number; // client pricing
-  collection: "gara" | "batik" | "woven";
+  collection: Collection;
   category: string;
   fabric: string;
   description: string;
   colors: string[];
   sizes: string[];
   images: string[]; // paths under /public
+  /** When false the product is shown for browsing only — the cart and
+   *  checkout reject it server-side. */
+  inStock: boolean;
 }
 
 export interface CartItem {
@@ -34,8 +39,285 @@ const img = (slug: string, n: number) => `/products/${slug}/${n}.jpg`;
 const imgs = (slug: string, count: number) =>
   Array.from({ length: count }, (_, i) => img(slug, i + 1));
 
+// Default sizes used across most fitted SS26 pieces. Override per product
+// when the piece is free-size or has a different range.
+const FITTED_SIZES = ["UK8", "UK10", "UK12", "UK14", "UK16"];
+const FREE_SIZE = ["Free Size (UK8–UK16)"];
+
 export const products: Product[] = [
-  // ─── GARA (Hand-dyed) Collection ───
+  // ─── SS26 SUMMER COLLECTION (in stock, prioritized) ───
+  {
+    id: "ss26-aisha",
+    name: "Aisha Dress",
+    priceUSD: 65,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "A breezy summer dress hand-batiked and tailored in Sierra Leone. Light, flowing, and made for the season.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-aisha", 7),
+    inStock: true,
+  },
+  {
+    id: "ss26-amy",
+    name: "Amy Dress",
+    priceUSD: 65,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "Relaxed-fit summer dress with our signature batik patterning. Soft cotton hand, easy through hot afternoons.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-amy", 11),
+    inStock: true,
+  },
+  {
+    id: "ss26-assie",
+    name: "Assie Dress",
+    priceUSD: 65,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "A clean, modern silhouette in hand-batik cotton. Made by women artisans in the provinces of Sierra Leone.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-assie", 2),
+    inStock: true,
+  },
+  {
+    id: "ss26-galleh-chic",
+    name: "Galleh Chic Kimono",
+    priceUSD: 100,
+    collection: "ss26",
+    category: "Kimono",
+    fabric: "Hand-batik cotton",
+    description:
+      "Statement kimono with chic batik patterning — open through the body, fluid in movement, perfect over a dress or denim.",
+    colors: ["Mix colors"],
+    sizes: FREE_SIZE,
+    images: imgs("ss26-galleh-chic", 3),
+    inStock: true,
+  },
+  {
+    id: "ss26-gbinti",
+    name: "Gbinti Jacket",
+    priceUSD: 125,
+    collection: "ss26",
+    category: "Jacket",
+    fabric: "Sierra Leonean Contri Cloth + hand batik",
+    description:
+      "Statement jacket pairing Sierra Leonean hand-woven contri cloth with hand-batik cotton. A new edition for SS26.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-gbinti", 2),
+    inStock: true,
+  },
+  {
+    id: "ss26-gigi",
+    name: "Gigi Pantsuit",
+    priceUSD: 79,
+    collection: "ss26",
+    category: "Pants Suit",
+    fabric: "Hand-batik cotton",
+    description:
+      "Two-piece batik pantsuit with a relaxed fit. Wear together for impact or split across the wardrobe.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-gigi", 6),
+    inStock: true,
+  },
+  {
+    id: "ss26-isatu",
+    name: "Isatu Dress",
+    priceUSD: 79,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "Named for our founder. A graceful summer silhouette in hand-batik cotton, finished by Tesmaraneh's tailors.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-isatu", 2),
+    inStock: true,
+  },
+  {
+    id: "ss26-juldeh",
+    name: "Juldeh Shirt",
+    priceUSD: 55,
+    collection: "ss26",
+    category: "Shirt",
+    fabric: "Hand-batik cotton",
+    description:
+      "Easy summer shirt — relaxed cut, soft hand, layered over anything. Hand-batiked in Sierra Leone.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-juldeh", 17),
+    inStock: true,
+  },
+  {
+    id: "ss26-mary",
+    name: "Mary Kimono",
+    priceUSD: 65,
+    collection: "ss26",
+    category: "Kimono",
+    fabric: "Hand-batik cotton",
+    description:
+      "Light, open kimono with a soft drape. Throw over the shoulders or wear belted as a dress.",
+    colors: ["Mix colors"],
+    sizes: FREE_SIZE,
+    images: imgs("ss26-mary", 6),
+    inStock: true,
+  },
+  {
+    id: "ss26-miriam-blazer",
+    name: "Miriam Blazer",
+    priceUSD: 65,
+    collection: "ss26",
+    category: "Blazer",
+    fabric: "Hand-batik cotton",
+    description:
+      "Tailored blazer in hand-batik cotton — structured shoulders, relaxed body. Equal parts ceremony and everyday.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-miriam-blazer", 1),
+    inStock: true,
+  },
+  {
+    id: "ss26-nema",
+    name: "Nema Dress",
+    priceUSD: 100,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton + silk",
+    description:
+      "An evening-leaning piece for SS26 — hand-batik cotton with light silk detail. Soft, elegant, with movement.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-nema", 5),
+    inStock: true,
+  },
+  {
+    id: "ss26-peagie",
+    name: "Peagie Dress",
+    priceUSD: 65,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "Easy summer dress with a defined waist and floating skirt. Hand-batiked by our artisans in the North.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-peagie", 5),
+    inStock: true,
+  },
+  {
+    id: "ss26-ranya",
+    name: "Ranya Jacket-Cover",
+    priceUSD: 30,
+    collection: "ss26",
+    category: "Jacket",
+    fabric: "Hand-batik cotton",
+    description:
+      "Light open cover-up — equal parts jacket and shrug. The accessible entry point into the SS26 collection.",
+    colors: ["Mix colors"],
+    sizes: FREE_SIZE,
+    images: imgs("ss26-ranya", 8),
+    inStock: true,
+  },
+  {
+    id: "ss26-sajor",
+    name: "Sajor Dress",
+    priceUSD: 86,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "A statement summer dress — bold hand-batik patterning, flowing skirt, finished by Tesmaraneh tailors.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-sajor", 9),
+    inStock: true,
+  },
+  {
+    id: "ss26-seray",
+    name: "Seray Pants",
+    priceUSD: 55,
+    collection: "ss26",
+    category: "Pants",
+    fabric: "Hand-batik cotton",
+    description:
+      "Relaxed-fit hand-batik pants with natural drape. Wear with the Juldeh Shirt or anything from the wardrobe.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-seray", 6),
+    inStock: true,
+  },
+  {
+    id: "ss26-sinky",
+    name: "Sinky Recycled Shirt",
+    priceUSD: 49,
+    collection: "ss26",
+    category: "Shirt",
+    fabric: "Recycled cotton + hand batik",
+    description:
+      "Made with recycled cotton offcuts and hand-batik panels. Each piece is its own composition — colourways vary.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-sinky", 9),
+    inStock: true,
+  },
+  {
+    id: "ss26-tia",
+    name: "Tia Dress",
+    priceUSD: 79,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "A quiet, confident summer piece — clean lines, light cotton, hand-batiked in the provinces.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-tia", 6),
+    inStock: true,
+  },
+  {
+    id: "ss26-zenita",
+    name: "Zenita Kimono",
+    priceUSD: 55,
+    collection: "ss26",
+    category: "Kimono",
+    fabric: "Hand-batik cotton",
+    description:
+      "A versatile open-front kimono. Pairs effortlessly with anything in the SS26 line — or anything you already own.",
+    colors: ["Mix colors"],
+    sizes: FREE_SIZE,
+    images: imgs("ss26-zenita", 7),
+    inStock: true,
+  },
+  {
+    id: "ss26-zenobia",
+    name: "Zenobia Dress",
+    priceUSD: 79,
+    collection: "ss26",
+    category: "Dress",
+    fabric: "Hand-batik cotton",
+    description:
+      "An anchor piece for the collection — flowing hand-batik cotton, balanced silhouette, made for warm days.",
+    colors: ["Mix colors"],
+    sizes: FITTED_SIZES,
+    images: imgs("ss26-zenobia", 2),
+    inStock: true,
+  },
+
+  // ─── ARCHIVE — previous collections, sold out ───
+  // Browseable for context but not purchasable. The /api/orders endpoint
+  // double-checks inStock so a tampered client can't slip these into a cart.
+
+  // ─── GARA (Hand-dyed) Collection — ARCHIVE ───
   {
     id: "hawawa-pants",
     name: "Hawawa Pants",
@@ -55,6 +337,7 @@ export const products: Product[] = [
     ],
     sizes: ["UK6", "UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("hawawa-pants", 4),
+    inStock: false,
   },
   {
     id: "mabel-dress",
@@ -68,6 +351,7 @@ export const products: Product[] = [
     colors: ["Mix colors"],
     sizes: ["Free Size"],
     images: imgs("mabel-dress", 4),
+    inStock: false,
   },
   {
     id: "sowa-jumpsuit",
@@ -81,6 +365,7 @@ export const products: Product[] = [
     colors: ["Mix color"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("sowa-jumpsuit", 4),
+    inStock: false,
   },
   {
     id: "mamani-dress",
@@ -94,6 +379,7 @@ export const products: Product[] = [
     colors: ["Mix color"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("mamani-dress", 2),
+    inStock: false,
   },
   {
     id: "yabom",
@@ -107,9 +393,10 @@ export const products: Product[] = [
     colors: ["Mix colors"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("yabom", 3),
+    inStock: false,
   },
 
-  // ─── BATIK Collection ───
+  // ─── BATIK Collection — ARCHIVE ───
   {
     id: "aissatou-jumpsuit",
     name: "Aissatou Jumpsuit",
@@ -122,6 +409,7 @@ export const products: Product[] = [
     colors: ["Purple", "Green", "Blue", "Pink", "Orange"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("aissatou-jumpsuit", 4),
+    inStock: false,
   },
   {
     id: "ami-rap-dress",
@@ -135,6 +423,7 @@ export const products: Product[] = [
     colors: ["Purple", "Green", "Blue", "Pink", "Orange", "Yellow"],
     sizes: ["Free Size (UK8–UK16)"],
     images: imgs("ami-rap-dress", 4),
+    inStock: false,
   },
   {
     id: "ariana-patch-dress",
@@ -148,6 +437,7 @@ export const products: Product[] = [
     colors: ["4-color mix"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("ariana-patch-dress", 1),
+    inStock: false,
   },
   {
     id: "dija-shirt-dress",
@@ -161,6 +451,7 @@ export const products: Product[] = [
     colors: ["Purple", "Green", "Blue", "Pink", "Orange"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("dija-shirt-dress", 4),
+    inStock: false,
   },
   {
     id: "isata-jacket-rap",
@@ -174,6 +465,7 @@ export const products: Product[] = [
     colors: ["Orange & Purple", "Blue & Red", "Yellow & Pink"],
     sizes: ["Free Size (UK8–UK16)"],
     images: imgs("isata-jacket-rap", 4),
+    inStock: false,
   },
   {
     id: "iyekallay-dress",
@@ -187,6 +479,7 @@ export const products: Product[] = [
     colors: ["Purple", "Green", "Blue", "Yellow", "Orange"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("iyekallay-dress", 4),
+    inStock: false,
   },
   {
     id: "marie-dress",
@@ -200,6 +493,7 @@ export const products: Product[] = [
     colors: ["Green", "Orange", "Red", "Pink", "Purple"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("marie-dress", 4),
+    inStock: false,
   },
   {
     id: "miriam-kimono",
@@ -213,6 +507,7 @@ export const products: Product[] = [
     colors: ["Pink", "Yellow", "Blue", "Green", "Orange", "Purple", "Lemon Green"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("miriam-kimono", 4),
+    inStock: false,
   },
   {
     id: "nenegalleh-boubou",
@@ -233,6 +528,7 @@ export const products: Product[] = [
     ],
     sizes: ["Free Size (UK8–UK18)"],
     images: imgs("nenegalleh-boubou", 4),
+    inStock: false,
   },
   {
     id: "tutu-kaftan-patch",
@@ -246,6 +542,7 @@ export const products: Product[] = [
     colors: ["Mix colors"],
     sizes: ["Free Size (UK8–UK16)"],
     images: imgs("tutu-kaftan-patch", 4),
+    inStock: false,
   },
   {
     id: "zaza-pants-suit",
@@ -267,9 +564,10 @@ export const products: Product[] = [
     ],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("zaza-pants-suit", 4),
+    inStock: false,
   },
 
-  // ─── WOVEN / COUNTRY CLOTH Collection ───
+  // ─── WOVEN / COUNTRY CLOTH Collection — ARCHIVE ───
   {
     id: "bunduka-jacket",
     name: "Bunduka Jacket",
@@ -282,10 +580,11 @@ export const products: Product[] = [
     colors: ["Indigo Blue mix (Yellow, Orange, Blue, Red, Pink)"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("bunduka-jacket", 4),
+    inStock: false,
   },
   {
     id: "gbinti-jacket",
-    name: "Gbinti Jacket",
+    name: "Gbinti Jacket (Archive)",
     priceUSD: 153,
     collection: "woven",
     category: "Jacket",
@@ -295,6 +594,7 @@ export const products: Product[] = [
     colors: ["Yellow", "Orange", "Blue", "Red", "Pink mix"],
     sizes: ["UK8", "UK10", "UK12", "UK14", "UK16"],
     images: imgs("gbinti-jacket", 4),
+    inStock: false,
   },
   {
     id: "umu-leppi-top",
@@ -308,15 +608,25 @@ export const products: Product[] = [
     colors: ["Indigo Blue"],
     sizes: ["Free Size (UK8–UK16)"],
     images: imgs("umu-leppi-top", 2),
+    inStock: false,
   },
 ];
 
-export function getProductsByCollection(
-  collection: "gara" | "batik" | "woven"
-): Product[] {
+export function getProductsByCollection(collection: Collection): Product[] {
   return products.filter((p) => p.collection === collection);
 }
 
 export function getProductById(id: string): Product | undefined {
   return products.find((p) => p.id === id);
 }
+
+/** In-stock products, in display order. SS26 first by virtue of array
+ *  position. Sold-out archive comes after. */
+export const inStockProducts = products.filter((p) => p.inStock);
+
+export const COLLECTION_LABELS: Record<Collection, string> = {
+  ss26: "SS26 Summer",
+  gara: "Gara Tie-Dye",
+  batik: "Batik",
+  woven: "Woven Country Cloth",
+};
