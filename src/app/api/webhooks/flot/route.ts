@@ -81,9 +81,11 @@ export async function POST(req: NextRequest) {
 
   if (!order) {
     // Ack with 200 — we don't want Flot to keep retrying a webhook for an
-    // order we can't find. Log loudly so we can investigate.
+    // order we can't find. JSON.stringify the reference so a hostile or
+    // malformed value can't inject newlines / ANSI / log-poisoning chars.
     console.warn(
-      `[flot webhook] reference ${payload.reference} not found`
+      "[flot webhook] reference not found:",
+      JSON.stringify(payload.reference)
     );
     return NextResponse.json({ ok: true });
   }
@@ -105,6 +107,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, already: true });
   }
 
+  // Refuse to clobber terminal states. A delayed retry of a stale
+  // payment.succeeded webhook (or a captured-and-replayed one) would
+  // otherwise revert a `delivered` or `cancelled` order. The webhook only
+  // owns the pending → paid/failed edge.
+  const terminal = order.status !== "pending";
+  if (terminal) {
+    console.warn(
+      "[flot webhook] refusing to overwrite non-pending status",
+      JSON.stringify({
+        reference: payload.reference,
+        currentStatus: order.status,
+        attemptedStatus: nextStatus,
+      })
+    );
+    return NextResponse.json({ ok: true, skipped: true });
+  }
+
   await db
     .update(orders)
     .set({
@@ -119,7 +138,12 @@ export async function POST(req: NextRequest) {
     fromStatus: order.status,
     toStatus: nextStatus,
     changedBy: "flot-webhook",
-    note: `event=${payload.event} payment_id=${payload.payment_id ?? "?"}`,
+    // Defensive: payload.event / payment_id come from a verified-signed
+    // payload so they're attacker-bounded (Flot signs them), but we still
+    // truncate to avoid an over-long event string ballooning the row.
+    note: `event=${String(payload.event).slice(0, 60)} payment_id=${String(
+      payload.payment_id ?? "?"
+    ).slice(0, 80)}`,
   });
 
   return NextResponse.json({ ok: true });

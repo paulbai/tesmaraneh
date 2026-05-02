@@ -8,6 +8,7 @@ import {
   signSession,
   verifyAdminPassword,
 } from "@/lib/auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -16,7 +17,34 @@ type LoginBody = {
   password?: string;
 };
 
+// Loose RFC-5321 shape — local-part@domain.tld. Stops obvious junk before
+// we hit the DB; not a strict validator (we don't need that — the admins
+// allowlist is the real check).
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+
+const LOGIN_RATE_LIMIT = {
+  capacity: 5, // 5 attempts in window
+  refillTokens: 5,
+  windowMs: 15 * 60_000, // per 15 minutes
+};
+
 export async function POST(req: NextRequest) {
+  // Per-IP throttle so a credential-stuffing bot can't hammer this endpoint.
+  // (See lib/rate-limit.ts for the serverless caveat — this is best-effort.)
+  const ip = clientIp(req);
+  const limit = rateLimit(`admin-login:${ip}`, LOGIN_RATE_LIMIT);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)),
+        },
+      }
+    );
+  }
+
   let body: LoginBody;
   try {
     body = (await req.json()) as LoginBody;
@@ -24,13 +52,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const email = body.email?.trim().toLowerCase();
+  const email = body.email?.trim().toLowerCase() ?? "";
   const password = body.password ?? "";
 
   if (!email || !password) {
     return NextResponse.json(
       { error: "Email and password are required" },
       { status: 400 }
+    );
+  }
+  if (email.length > 320 || password.length > 200 || !EMAIL_RE.test(email)) {
+    return NextResponse.json(
+      { error: "Invalid email or password" },
+      { status: 401 }
     );
   }
 
