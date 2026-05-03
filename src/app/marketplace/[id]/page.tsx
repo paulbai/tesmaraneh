@@ -177,6 +177,33 @@ export default function ProductDetailPage({
                 {product.description}
               </p>
 
+              {!product.inStock && (
+                <div className="bg-[var(--terracotta)]/10 border border-[var(--terracotta)]/30 rounded-2xl px-4 sm:px-5 py-4">
+                  <p className="font-[family-name:var(--font-body)] text-sm text-[var(--charcoal)] leading-relaxed">
+                    <span className="font-semibold text-[var(--terracotta-dark)]">
+                      This piece is from our archive.
+                    </span>{" "}
+                    Some pieces can be remade to order. Reach out on{" "}
+                    <a
+                      href="https://wa.me/23277413684"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-[var(--terracotta-dark)] underline underline-offset-2"
+                    >
+                      WhatsApp
+                    </a>{" "}
+                    or{" "}
+                    <a
+                      href="mailto:tesmaranehgroup@gmail.com"
+                      className="font-semibold text-[var(--terracotta-dark)] underline underline-offset-2"
+                    >
+                      email
+                    </a>{" "}
+                    and we&rsquo;ll let you know what&rsquo;s possible.
+                  </p>
+                </div>
+              )}
+
               {/* Color selector */}
               {product.colors.length > 0 && (
                 <div>

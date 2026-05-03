@@ -333,10 +333,36 @@ export function CartDrawer() {
             {step === "details" && (
               <>
                 <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4">
-                  <p className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)] mb-4">
+                  <p className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)] mb-2">
                     Enter your delivery details. We&rsquo;ll confirm your order by phone
                     once payment is received.
                   </p>
+
+                  <div className="bg-[var(--terracotta)]/8 border border-[var(--terracotta)]/30 rounded-xl px-4 py-3 mb-2">
+                    <p className="font-[family-name:var(--font-body)] text-xs text-[var(--charcoal)] leading-relaxed">
+                      <span className="font-semibold text-[var(--terracotta-dark)]">
+                        Delivery is arranged personally.
+                      </span>{" "}
+                      After your payment is confirmed, please contact us on{" "}
+                      <a
+                        href="https://wa.me/23277413684"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[var(--terracotta-dark)] underline underline-offset-2"
+                      >
+                        +232 77 413 684
+                      </a>{" "}
+                      or{" "}
+                      <a
+                        href="mailto:tesmaranehgroup@gmail.com"
+                        className="font-semibold text-[var(--terracotta-dark)] underline underline-offset-2"
+                      >
+                        tesmaranehgroup@gmail.com
+                      </a>{" "}
+                      so we can coordinate delivery — locally in Sierra Leone
+                      or shipped internationally.
+                    </p>
+                  </div>
 
                   <FormField
                     label="Full Name *"

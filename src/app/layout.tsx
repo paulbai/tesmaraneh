@@ -77,10 +77,8 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
   },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/logo-nobg.png",
-  },
+  // Favicons resolved via the file-system convention: app/icon.png and
+  // app/apple-icon.png are picked up automatically by Next 16.
   robots: {
     index: true,
     follow: true,

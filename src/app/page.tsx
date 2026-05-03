@@ -633,20 +633,25 @@ function About() {
             <AnimatedSection delay={0.3}>
               <p className="text-base sm:text-lg text-[var(--warm-gray)] leading-relaxed font-[family-name:var(--font-body)] font-light">
                 Tesmaraneh is a local Sierra Leonean clothing brand founded by
-                Isatu Bundu in Freetown — unofficially in 2016 and officially
-                launched in 2018. We use local and sustainable techniques to
-                create beautiful, timeless designs for women, working with
-                handmade fabrics including Gara tie-dye, batik, and hand-woven
-                country cloth.
+                Isatu Bundu in 2016 (unofficially), and officially registered
+                in 2018. We use local sustainable techniques to produce
+                beautiful, timeless designs for women.
               </p>
             </AnimatedSection>
 
             <AnimatedSection delay={0.4}>
               <p className="text-base sm:text-lg text-[var(--warm-gray)] leading-relaxed font-[family-name:var(--font-body)] font-light">
-                Our mission is to showcase Sierra Leonean clothing around the
-                region and beyond, while empowering women and local artisans in
-                the process. Every piece tells a story of heritage, craft, and
-                the women who make it possible.
+                Our mission is to grow our local textile industry and limit the
+                importation of textile and fabrics from the West. We are also
+                using fashion to empower our local communities through skills
+                training and employment.
+              </p>
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.45}>
+              <p className="text-base sm:text-lg text-[var(--warm-gray)] leading-relaxed font-[family-name:var(--font-body)] font-light">
+                Every piece made by us tells a story of heritage, craft, and
+                the women who made it possible.
               </p>
             </AnimatedSection>
 

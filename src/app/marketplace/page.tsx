@@ -198,6 +198,29 @@ export default function MarketplacePage() {
                 made in the provinces of Sierra Leone. Previous collections
                 are sold out but remain in the archive below.
               </p>
+
+              <div className="mt-6 inline-flex flex-wrap items-center gap-x-2 gap-y-1 bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2.5 max-w-xl">
+                <span className="font-[family-name:var(--font-body)] text-xs sm:text-sm text-white">
+                  Love an archive piece? Some can still be remade to order —
+                  reach out on{" "}
+                  <a
+                    href="https://wa.me/23277413684"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold underline underline-offset-2 hover:text-[var(--ochre-light)] transition-colors"
+                  >
+                    WhatsApp
+                  </a>{" "}
+                  or{" "}
+                  <a
+                    href="mailto:tesmaranehgroup@gmail.com"
+                    className="font-semibold underline underline-offset-2 hover:text-[var(--ochre-light)] transition-colors"
+                  >
+                    email
+                  </a>
+                  .
+                </span>
+              </div>
             </motion.div>
           </div>
 
