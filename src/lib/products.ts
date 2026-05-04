@@ -23,15 +23,59 @@ export interface CartItem {
   color?: string;
 }
 
-// Display price in new Sierra Leonean Leones (~22 per USD; old Le/1000).
-// E.g. $85 → Le 1,870 (was Le 1,870,000 under the old note-set).
-export function formatPrice(priceUSD: number): string {
-  const sle = Math.round((priceUSD * 22) / 10) * 10;
-  return `Le ${sle.toLocaleString()}`;
+/* ─── Pricing model ───
+ *
+ *  The catalog stores `priceUSD` as a price-point integer (legacy field
+ *  name; not literally a USD price any more). Display layers convert:
+ *
+ *     SLE = round(priceUSD × 22 / 10) × 10           ← anchored local price
+ *     USD = round(SLE / 24 × 10) / 10                ← FX equivalent at our rate
+ *
+ *  Customers see both. The SLE figure is the primary local price; the USD
+ *  figure is what the same Leones are worth at our published rate of
+ *  Le 24 = $1, rounded to the nearest 10¢.
+ *
+ *  Why 22 for SLE but 24 for USD: SLE values are anchored from the
+ *  founder's pricing memory (e.g. "Le 1,430 for the Aisha dress"). The
+ *  catalog field that produces those rounded SLE figures was set against
+ *  the older Le 22 / $1 rate. Today's published rate is Le 24 / $1, so
+ *  the SLE → USD direction uses 24. We don't re-anchor SLE values to
+ *  avoid moving every price tag.
+ */
+
+/** Sierra Leonean Leones per USD — the rate published to customers. */
+export const SLE_PER_USD = 24;
+
+/** Numeric SLE price for a product, rounded to the nearest 10 Le. */
+export function priceInSll(priceUSD: number): number {
+  return Math.round((priceUSD * 22) / 10) * 10;
 }
 
+/** Numeric USD price for a product at the published FX rate, rounded to
+ *  the nearest 10¢ for clean display. */
+export function priceInUsd(priceUSD: number): number {
+  return Math.round((priceInSll(priceUSD) / SLE_PER_USD) * 10) / 10;
+}
+
+/** "Le 1,430" */
+export function formatPrice(priceUSD: number): string {
+  return `Le ${priceInSll(priceUSD).toLocaleString()}`;
+}
+
+/** "$59.60" */
 export function formatPriceUSD(priceUSD: number): string {
-  return `$${priceUSD}`;
+  return `$${priceInUsd(priceUSD).toFixed(2)}`;
+}
+
+/** "Le 1,430 · $59.60" */
+export function formatPriceBoth(priceUSD: number): string {
+  return `${formatPrice(priceUSD)} · ${formatPriceUSD(priceUSD)}`;
+}
+
+/** Convert a raw SLE total (already summed across the cart) into USD at
+ *  the published rate, rounded to 10¢. Used for cart totals + Flot URL. */
+export function sllToUsd(sll: number): number {
+  return Math.round((sll / SLE_PER_USD) * 10) / 10;
 }
 
 // Helper to build image paths

@@ -3,21 +3,26 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { formatPrice } from "@/lib/products";
+import {
+  formatPrice,
+  formatPriceUSD,
+  priceInSll,
+  priceInUsd,
+  sllToUsd,
+} from "@/lib/products";
 import Image from "next/image";
 import { useState } from "react";
 
 /*
  * Flot merchant checkout for Tesmaraneh. Customer details + cart summary +
- * total amount (in Sierra Leonean Leones, matching what the shopper saw in
- * their cart) are appended as URL query params so the checkout page
- * pre-fills automatically.
+ * total amount are appended as URL query params so the checkout page
+ * pre-fills automatically. The shopper picks SLE or USD before the redirect
+ * — we send Flot the amount + currency for that choice so Flot honours the
+ * Le 24 = $1 rate, not its own.
  */
 const CHECKOUT_URL = "https://pay.flotme.ai/tesmaraneh";
 
-/** Convert the internal USD price into the new-Leone amount shown in the UI
- *  (same rounding as formatPrice in lib/products). */
-const toSLL = (usd: number) => Math.round((usd * 22) / 10) * 10;
+type PayCurrency = "SLL" | "USD";
 
 type CheckoutForm = {
   name: string;
@@ -40,7 +45,6 @@ export function CartDrawer() {
     updateQuantity,
     clearCart,
     totalItems,
-    totalPriceUSD,
     isCartOpen,
     setIsCartOpen,
   } = useCart();
@@ -51,6 +55,17 @@ export function CartDrawer() {
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [payCurrency, setPayCurrency] = useState<PayCurrency>("SLL");
+
+  // Cart totals in both currencies. The SLE figure is the cart line-by-line
+  // sum (each line rounded to 10 Le), then USD is the converted total at
+  // Le 24 = $1. This keeps the per-line and total figures consistent with
+  // what the shopper sees on each row.
+  const totalSll = items.reduce(
+    (s, i) => s + priceInSll(i.product.priceUSD) * i.quantity,
+    0
+  );
+  const totalUsd = sllToUsd(totalSll);
 
   const validate = () => {
     const e: Partial<Record<keyof CheckoutForm, string>> = {};
@@ -99,13 +114,16 @@ export function CartDrawer() {
         throw new Error(data.error ?? "Unable to create order");
       }
 
-      const { reference, totalSll } = (await res.json()) as {
+      const { reference, totalSll: serverSll } = (await res.json()) as {
         reference: string;
         totalSll: number;
       };
 
-      // 2. Build the Flot URL with the server-issued reference and the
-      //    authoritative SLL total.
+      // 2. Build the Flot URL. Server issues the canonical SLE total; we
+      //    derive USD at our published rate (Le 24 = $1) and hand Flot
+      //    whichever currency the shopper picked. We also pass the other
+      //    currency's amount so Flot can display the alternate total
+      //    without applying its own FX rate.
       const summary = items
         .map(
           (i) =>
@@ -115,11 +133,19 @@ export function CartDrawer() {
         )
         .join("; ");
 
+      const usdTotal = sllToUsd(serverSll);
+      const isUsd = payCurrency === "USD";
+      const primaryAmount = isUsd ? usdTotal.toFixed(2) : serverSll.toString();
+
       const params = new URLSearchParams({
-        amount: totalSll.toString(),
-        total: totalSll.toString(),
-        price: totalSll.toString(),
-        currency: "SLL",
+        amount: primaryAmount,
+        total: primaryAmount,
+        price: primaryAmount,
+        currency: payCurrency,
+        // Pass both totals so Flot's currency switcher uses our rate, not
+        // its own. Field names follow Flot's documented variants.
+        amount_sll: serverSll.toString(),
+        amount_usd: usdTotal.toFixed(2),
         merchant: "tesmaraneh",
         reference,
         description: `Tesmaraneh order — ${totalItems} item${
@@ -252,7 +278,10 @@ export function CartDrawer() {
                               {item.color ? ` · ${item.color}` : ""}
                             </p>
                             <p className="font-[family-name:var(--font-display)] text-sm font-bold text-[var(--terracotta)] mt-1">
-                              {formatPrice(item.product.priceUSD)}
+                              {formatPrice(item.product.priceUSD)}{" "}
+                              <span className="font-[family-name:var(--font-body)] text-[11px] font-medium text-[var(--warm-gray)]">
+                                · {formatPriceUSD(item.product.priceUSD)}
+                              </span>
                             </p>
 
                             <div className="flex items-center gap-3 mt-2">
@@ -291,7 +320,18 @@ export function CartDrawer() {
 
                           <div className="text-right shrink-0">
                             <p className="font-[family-name:var(--font-body)] text-sm font-bold text-[var(--charcoal)]">
-                              {formatPrice(item.product.priceUSD * item.quantity)}
+                              Le{" "}
+                              {(
+                                priceInSll(item.product.priceUSD) *
+                                item.quantity
+                              ).toLocaleString()}
+                            </p>
+                            <p className="font-[family-name:var(--font-body)] text-[11px] text-[var(--warm-gray)] mt-0.5">
+                              $
+                              {(
+                                priceInUsd(item.product.priceUSD) *
+                                item.quantity
+                              ).toFixed(2)}
                             </p>
                           </div>
                         </motion.div>
@@ -306,9 +346,14 @@ export function CartDrawer() {
                       <span className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)]">
                         Subtotal ({totalItems} {totalItems === 1 ? "item" : "items"})
                       </span>
-                      <span className="font-[family-name:var(--font-display)] text-xl font-bold text-[var(--charcoal)]">
-                        {formatPrice(totalPriceUSD)}
-                      </span>
+                      <div className="text-right">
+                        <div className="font-[family-name:var(--font-display)] text-xl font-bold text-[var(--charcoal)] leading-tight">
+                          Le {totalSll.toLocaleString()}
+                        </div>
+                        <div className="font-[family-name:var(--font-body)] text-xs text-[var(--warm-gray)] mt-0.5">
+                          ${totalUsd.toFixed(2)} at Le 24 = $1
+                        </div>
+                      </div>
                     </div>
 
                     <button
@@ -402,6 +447,49 @@ export function CartDrawer() {
                     placeholder="Freetown"
                   />
 
+                  <div>
+                    <p className="font-[family-name:var(--font-body)] text-xs tracking-widest uppercase text-[var(--warm-gray)] mb-2">
+                      Pay In
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPayCurrency("SLL")}
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-left transition-all ${
+                          payCurrency === "SLL"
+                            ? "border-[var(--terracotta)] bg-[var(--terracotta)]/5"
+                            : "border-[var(--cream-dark)] bg-white hover:border-[var(--warm-gray-light)]"
+                        }`}
+                      >
+                        <span className="block font-[family-name:var(--font-body)] text-[10px] tracking-widest uppercase text-[var(--warm-gray)]">
+                          Leones
+                        </span>
+                        <span className="block font-[family-name:var(--font-display)] text-base font-bold text-[var(--charcoal)]">
+                          Le {totalSll.toLocaleString()}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPayCurrency("USD")}
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-left transition-all ${
+                          payCurrency === "USD"
+                            ? "border-[var(--terracotta)] bg-[var(--terracotta)]/5"
+                            : "border-[var(--cream-dark)] bg-white hover:border-[var(--warm-gray-light)]"
+                        }`}
+                      >
+                        <span className="block font-[family-name:var(--font-body)] text-[10px] tracking-widest uppercase text-[var(--warm-gray)]">
+                          US Dollars
+                        </span>
+                        <span className="block font-[family-name:var(--font-display)] text-base font-bold text-[var(--charcoal)]">
+                          ${totalUsd.toFixed(2)}
+                        </span>
+                      </button>
+                    </div>
+                    <p className="mt-2 font-[family-name:var(--font-body)] text-[11px] text-[var(--warm-gray)]">
+                      Exchange rate: Le 24 = $1.
+                    </p>
+                  </div>
+
                   <div className="bg-[var(--cream)] rounded-2xl p-4 space-y-3 border border-[var(--cream-dark)]">
                     <p className="font-[family-name:var(--font-body)] text-xs tracking-widest uppercase text-[var(--warm-gray)]">
                       Order Summary
@@ -423,8 +511,22 @@ export function CartDrawer() {
                             </p>
                           )}
                         </div>
-                        <span className="text-[var(--warm-gray)] shrink-0">
-                          {formatPrice(i.product.priceUSD * i.quantity)}
+                        <span className="text-[var(--warm-gray)] shrink-0 text-right">
+                          {payCurrency === "SLL" ? (
+                            <>
+                              Le{" "}
+                              {(
+                                priceInSll(i.product.priceUSD) * i.quantity
+                              ).toLocaleString()}
+                            </>
+                          ) : (
+                            <>
+                              $
+                              {(
+                                priceInUsd(i.product.priceUSD) * i.quantity
+                              ).toFixed(2)}
+                            </>
+                          )}
                         </span>
                       </div>
                     ))}
@@ -433,7 +535,9 @@ export function CartDrawer() {
                         Total
                       </span>
                       <span className="font-[family-name:var(--font-display)] font-bold text-[var(--terracotta)]">
-                        {formatPrice(totalPriceUSD)}
+                        {payCurrency === "SLL"
+                          ? `Le ${totalSll.toLocaleString()}`
+                          : `$${totalUsd.toFixed(2)}`}
                       </span>
                     </div>
                   </div>
@@ -472,7 +576,9 @@ export function CartDrawer() {
                   >
                     {submitting
                       ? "Creating order…"
-                      : `Pay ${formatPrice(totalPriceUSD)}`}
+                      : payCurrency === "USD"
+                      ? `Pay $${totalUsd.toFixed(2)}`
+                      : `Pay Le ${totalSll.toLocaleString()}`}
                   </button>
                 </div>
               </>
@@ -506,7 +612,10 @@ export function CartDrawer() {
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={16} className="text-[var(--forest)]" />
                   <span className="font-[family-name:var(--font-body)] text-sm font-semibold text-[var(--charcoal)]">
-                    Secure Checkout · {formatPrice(totalPriceUSD)}
+                    Secure Checkout ·{" "}
+                    {payCurrency === "USD"
+                      ? `$${totalUsd.toFixed(2)}`
+                      : `Le ${totalSll.toLocaleString()}`}
                   </span>
                 </div>
                 <button

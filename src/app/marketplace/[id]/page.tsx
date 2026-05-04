@@ -17,6 +17,7 @@ import {
   getProductById,
   products,
   formatPrice,
+  formatPriceUSD,
   COLLECTION_LABELS,
 } from "@/lib/products";
 import { useCart } from "@/context/cart-context";
@@ -158,7 +159,7 @@ export default function ProductDetailPage({
                 </p>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <span
                   className={`font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-black ${
                     product.inStock
@@ -168,8 +169,17 @@ export default function ProductDetailPage({
                 >
                   {formatPrice(product.priceUSD)}
                 </span>
-                <span className="font-[family-name:var(--font-body)] text-sm text-[var(--warm-gray)]">
-                  ≈ ${product.priceUSD} USD
+                <span
+                  className={`font-[family-name:var(--font-body)] text-base sm:text-lg font-semibold ${
+                    product.inStock
+                      ? "text-[var(--warm-gray)]"
+                      : "text-stone-400 line-through"
+                  }`}
+                >
+                  {formatPriceUSD(product.priceUSD)}
+                </span>
+                <span className="font-[family-name:var(--font-body)] text-xs text-[var(--warm-gray-light)]">
+                  Le 24 = $1
                 </span>
               </div>
 

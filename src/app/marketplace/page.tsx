@@ -8,6 +8,7 @@ import { ShoppingBag, Filter, Check } from "lucide-react";
 import {
   products,
   formatPrice,
+  formatPriceUSD,
   COLLECTION_LABELS,
   type Product,
   type Collection,
@@ -98,16 +99,27 @@ function ProductCard({ product }: { product: Product }) {
         <p className="font-[family-name:var(--font-body)] text-[10px] sm:text-xs text-[var(--warm-gray)] leading-relaxed line-clamp-2 hidden sm:block">
           {product.fabric}
         </p>
-        <div className="flex items-center justify-between pt-1 mt-auto">
-          <span
-            className={`font-[family-name:var(--font-display)] text-base sm:text-xl font-bold ${
-              product.inStock
-                ? "text-[var(--terracotta)]"
-                : "text-stone-400 line-through"
-            }`}
-          >
-            {formatPrice(product.priceUSD)}
-          </span>
+        <div className="flex items-baseline justify-between gap-2 pt-1 mt-auto">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span
+              className={`font-[family-name:var(--font-display)] text-base sm:text-xl font-bold leading-none ${
+                product.inStock
+                  ? "text-[var(--terracotta)]"
+                  : "text-stone-400 line-through"
+              }`}
+            >
+              {formatPrice(product.priceUSD)}
+            </span>
+            <span
+              className={`font-[family-name:var(--font-body)] text-[11px] sm:text-xs leading-none ${
+                product.inStock
+                  ? "text-[var(--warm-gray)]"
+                  : "text-stone-400 line-through"
+              }`}
+            >
+              {formatPriceUSD(product.priceUSD)}
+            </span>
+          </div>
         </div>
         {product.inStock ? (
           <button
