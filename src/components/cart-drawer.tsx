@@ -157,6 +157,19 @@ export function CartDrawer() {
         items: summary,
       });
 
+      // When the shopper paid in USD, force-select Bank Card on the Flot
+      // checkout. Mobile Money rails in Sierra Leone only settle in SLL, so
+      // a USD checkout that lands on the Mobile Money tab is a dead end —
+      // Bank Card is the only viable rail. We pass several field-name
+      // variants because Flot's URL contract isn't formally documented;
+      // unknown keys are ignored by the checkout, known ones take effect.
+      if (isUsd) {
+        params.set("payment_method", "card");
+        params.set("method", "card");
+        params.set("preferred_method", "card");
+        params.set("default_method", "card");
+      }
+
       setCheckoutUrl(`${CHECKOUT_URL}?${params.toString()}`);
     } catch (err) {
       console.error("[checkout] order creation failed:", err);
