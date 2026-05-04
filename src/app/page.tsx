@@ -510,10 +510,10 @@ function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={contentVisible ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 1.6 }}
-                className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 bg-[var(--ochre)] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-bold tracking-wider uppercase shadow-lg"
+                className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 bg-[var(--ochre)] text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-bold tracking-wider uppercase shadow-lg whitespace-nowrap"
               >
-                <span className="flex items-center gap-2">
-                  <Globe size={12} />
+                <span className="flex items-center gap-2 whitespace-nowrap">
+                  <Globe size={12} className="shrink-0" />
                   Handcrafted in Sierra Leone
                 </span>
               </motion.div>
