@@ -307,6 +307,17 @@ function Navbar() {
 }
 
 /* ─── HERO ─── */
+/* Slideshow images for the hero card — first cover image of each SS26
+ * product. Capped at 12 to keep the upfront image weight reasonable
+ * (~500 KB total). Order is deterministic so server-rendered HTML
+ * matches client hydration. */
+const HERO_SLIDESHOW_IMAGES: string[] = products
+  .filter((p) => p.collection === "ss26")
+  .map((p) => p.images[0])
+  .slice(0, 12);
+
+const HERO_SLIDESHOW_INTERVAL_MS = 5000;
+
 function Hero() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -315,10 +326,21 @@ function Hero() {
   });
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const [contentVisible, setContentVisible] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setContentVisible(true), 1500);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Advance the SS26 slideshow every 5s. Effect runs once; cleared on
+  // unmount. Index wraps via modulo so the rotation loops indefinitely.
+  useEffect(() => {
+    if (HERO_SLIDESHOW_IMAGES.length <= 1) return;
+    const id = setInterval(() => {
+      setSlideIndex((i) => (i + 1) % HERO_SLIDESHOW_IMAGES.length);
+    }, HERO_SLIDESHOW_INTERVAL_MS);
+    return () => clearInterval(id);
   }, []);
 
   return (
@@ -423,51 +445,49 @@ function Hero() {
             >
               {/* Card */}
               <div className="relative w-[240px] h-[320px] sm:w-[280px] sm:h-[370px] md:w-[420px] md:h-[560px] rounded-[28px] sm:rounded-[40px] overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl">
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white/90 p-4 sm:p-6 md:p-8">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-white/20 flex items-center justify-center mb-4 md:mb-6">
-                    <Scissors size={28} className="text-white/50 sm:hidden" />
-                    <Scissors size={36} className="text-white/50 hidden sm:block" />
+                {/* SS26 slideshow — every photo is mounted once, then we
+                    crossfade between them with a CSS opacity transition.
+                    Simpler and more deterministic than AnimatePresence:
+                    no zombie children, no hydration drift, only ever ~12
+                    image elements in the DOM. */}
+                {HERO_SLIDESHOW_IMAGES.map((src, i) => (
+                  <div
+                    key={src}
+                    aria-hidden={i !== slideIndex}
+                    className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
+                    style={{ opacity: i === slideIndex ? 1 : 0 }}
+                  >
+                    <Image
+                      src={src}
+                      alt="Tesmaraneh SS26 collection"
+                      fill
+                      priority={i === 0}
+                      sizes="(max-width: 640px) 240px, (max-width: 768px) 280px, 420px"
+                      className="object-cover"
+                    />
                   </div>
-                  <p className="font-[family-name:var(--font-accent)] text-xl sm:text-2xl md:text-4xl italic text-center leading-tight text-white/80">
+                ))}
+
+                {/* Dark gradient so the headline overlay stays legible
+                    over any photo. */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/70 pointer-events-none" />
+
+                {/* Foreground caption — kept identical to the previous static
+                    layout so the rest of the hero composition (badges, scroll
+                    cue) stays balanced. */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white/95 p-4 sm:p-6 md:p-8 pointer-events-none">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-white/40 backdrop-blur-sm flex items-center justify-center mb-4 md:mb-6 bg-white/5">
+                    <Scissors size={28} className="text-white/80 sm:hidden" />
+                    <Scissors size={36} className="text-white/80 hidden sm:block" />
+                  </div>
+                  <p className="font-[family-name:var(--font-accent)] text-xl sm:text-2xl md:text-4xl italic text-center leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                     Handcrafted in
                     <br />
                     Freetown
                   </p>
-                  <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-widest uppercase mt-2 sm:mt-4 text-white/40">
+                  <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-widest uppercase mt-2 sm:mt-4 text-white/70 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
                     Sierra Leone
                   </p>
-                </div>
-
-                {/* Decorative pattern overlay */}
-                <div className="absolute inset-0 opacity-5">
-                  <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <pattern
-                        id="africanPattern"
-                        x="0"
-                        y="0"
-                        width="60"
-                        height="60"
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <path
-                          d="M30 0 L60 30 L30 60 L0 30 Z"
-                          fill="none"
-                          stroke="white"
-                          strokeWidth="1"
-                        />
-                        <circle
-                          cx="30"
-                          cy="30"
-                          r="8"
-                          fill="none"
-                          stroke="white"
-                          strokeWidth="1"
-                        />
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#africanPattern)" />
-                  </svg>
                 </div>
               </div>
 
