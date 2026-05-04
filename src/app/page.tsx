@@ -22,7 +22,6 @@ import {
   ChevronDown,
   Award,
   Users,
-  Scissors,
 } from "lucide-react";
 
 /* Inline social icons (not available in lucide-react) */
@@ -444,51 +443,45 @@ function Hero() {
               className="relative"
             >
               {/* Card */}
-              <div className="relative w-[240px] h-[320px] sm:w-[280px] sm:h-[370px] md:w-[420px] md:h-[560px] rounded-[28px] sm:rounded-[40px] overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl">
-                {/* SS26 slideshow — every photo is mounted once, then we
-                    crossfade between them with a CSS opacity transition.
-                    Simpler and more deterministic than AnimatePresence:
-                    no zombie children, no hydration drift, only ever ~12
-                    image elements in the DOM. */}
-                {HERO_SLIDESHOW_IMAGES.map((src, i) => (
-                  <div
-                    key={src}
-                    aria-hidden={i !== slideIndex}
-                    className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
-                    style={{ opacity: i === slideIndex ? 1 : 0 }}
+              <div
+                className="relative w-[240px] h-[320px] sm:w-[280px] sm:h-[370px] md:w-[420px] md:h-[560px] rounded-[28px] sm:rounded-[40px] overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl"
+                style={{ perspective: "1600px" }}
+              >
+                {/* SS26 slideshow — 3D card flip on every transition.
+                    AnimatePresence in `mode="wait"` keeps exactly one slide
+                    mounted at a time (no zombie children), and the rotateY
+                    + perspective combo gives a real card-flipping feel
+                    rather than a flat opacity fade. */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={slideIndex}
+                    initial={{ rotateY: 90, opacity: 0 }}
+                    animate={{ rotateY: 0, opacity: 1 }}
+                    exit={{ rotateY: -90, opacity: 0 }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    style={{
+                      transformStyle: "preserve-3d",
+                      backfaceVisibility: "hidden",
+                    }}
+                    className="absolute inset-0"
                   >
                     <Image
-                      src={src}
+                      src={
+                        HERO_SLIDESHOW_IMAGES[
+                          slideIndex % HERO_SLIDESHOW_IMAGES.length
+                        ]
+                      }
                       alt="Tesmaraneh SS26 collection"
                       fill
-                      priority={i === 0}
+                      priority={slideIndex === 0}
                       sizes="(max-width: 640px) 240px, (max-width: 768px) 280px, 420px"
                       className="object-cover"
                     />
-                  </div>
-                ))}
+                  </motion.div>
+                </AnimatePresence>
 
-                {/* Dark gradient so the headline overlay stays legible
-                    over any photo. */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/70 pointer-events-none" />
-
-                {/* Foreground caption — kept identical to the previous static
-                    layout so the rest of the hero composition (badges, scroll
-                    cue) stays balanced. */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white/95 p-4 sm:p-6 md:p-8 pointer-events-none">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-white/40 backdrop-blur-sm flex items-center justify-center mb-4 md:mb-6 bg-white/5">
-                    <Scissors size={28} className="text-white/80 sm:hidden" />
-                    <Scissors size={36} className="text-white/80 hidden sm:block" />
-                  </div>
-                  <p className="font-[family-name:var(--font-accent)] text-xl sm:text-2xl md:text-4xl italic text-center leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                    Handcrafted in
-                    <br />
-                    Freetown
-                  </p>
-                  <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-widest uppercase mt-2 sm:mt-4 text-white/70 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
-                    Sierra Leone
-                  </p>
-                </div>
+                {/* Soft vignette so the badges stay legible over any photo. */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
               </div>
 
               {/* Floating badges around the card */}
@@ -521,7 +514,7 @@ function Hero() {
               >
                 <span className="flex items-center gap-2">
                   <Globe size={12} />
-                  Made in Africa
+                  Handcrafted in Sierra Leone
                 </span>
               </motion.div>
             </motion.div>
