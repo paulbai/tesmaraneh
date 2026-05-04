@@ -157,17 +157,34 @@ export function CartDrawer() {
         items: summary,
       });
 
-      // When the shopper paid in USD, force-select Bank Card on the Flot
-      // checkout. Mobile Money rails in Sierra Leone only settle in SLL, so
-      // a USD checkout that lands on the Mobile Money tab is a dead end —
-      // Bank Card is the only viable rail. We pass several field-name
-      // variants because Flot's URL contract isn't formally documented;
-      // unknown keys are ignored by the checkout, known ones take effect.
+      // When the shopper paid in USD, try to force USD + Bank Card on the
+      // Flot checkout. Mobile Money rails in Sierra Leone only settle in
+      // SLL, so a USD checkout that lands on the Mobile Money tab is a
+      // dead end — Bank Card is the only viable rail.
+      //
+      // Flot's URL contract isn't formally documented, so we shotgun every
+      // plausible field name from the wider payment-platform vocabulary.
+      // Unknown keys are ignored by the checkout; known ones take effect.
+      // The visible "Pick USD + Bank Card" banner in the modal is the
+      // human fallback when none of these names match.
       if (isUsd) {
+        // Currency lock
+        params.set("currency", "USD");
+        params.set("currency_code", "USD");
+        params.set("currencyCode", "USD");
+        params.set("default_currency", "USD");
+        params.set("preferred_currency", "USD");
+        params.set("lock_currency", "1");
+        // Payment-method lock → card
         params.set("payment_method", "card");
+        params.set("payment_methods", "card");
         params.set("method", "card");
+        params.set("methods", "card");
         params.set("preferred_method", "card");
         params.set("default_method", "card");
+        params.set("allowed_methods", "card");
+        params.set("disable_mobile_money", "1");
+        params.set("country", "US");
       }
 
       setCheckoutUrl(`${CHECKOUT_URL}?${params.toString()}`);
@@ -639,6 +656,24 @@ export function CartDrawer() {
                   <X size={16} />
                 </button>
               </div>
+
+              {/* When paying in USD, Flot's hosted checkout still defaults
+                  the currency dropdown to SLE and the payment method to
+                  Mobile Money. Mobile Money won't settle USD, so we make
+                  the required selections impossible to miss. */}
+              {payCurrency === "USD" && (
+                <div className="shrink-0 bg-[var(--terracotta)]/10 border-b border-[var(--terracotta)]/30 px-5 py-3">
+                  <p className="font-[family-name:var(--font-body)] text-xs text-[var(--charcoal)] leading-relaxed">
+                    <span className="font-bold text-[var(--terracotta-dark)]">
+                      On the Flot screen below:
+                    </span>{" "}
+                    change the currency to <strong>USD</strong> and pick{" "}
+                    <strong>Bank Card</strong>. Mobile Money cannot accept
+                    USD payments.
+                  </p>
+                </div>
+              )}
+
               <iframe
                 src={checkoutUrl}
                 title="Tesmaraneh secure checkout"
