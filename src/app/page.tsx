@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform, useInView, AnimatePresence } from "fra
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { SpiralAnimation } from "@/components/ui/spiral-animation";
 import { CollectionModal } from "@/components/collection-modal";
 import { CartDrawer } from "@/components/cart-drawer";
 import { useCart } from "@/context/cart-context";
@@ -344,6 +345,11 @@ function Hero() {
       ref={ref}
       className="relative h-[calc(100vh-32px)] overflow-hidden bg-black"
     >
+      {/* Spiral animation background — visible during image transitions */}
+      <div className="absolute inset-0">
+        <SpiralAnimation />
+      </div>
+
       {/* Full-width images with crossfade transition */}
       <motion.div style={{ opacity }} className="absolute inset-0">
         {/* Mobile: single image — crossfade (old stays visible under new) */}
