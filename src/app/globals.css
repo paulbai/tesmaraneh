@@ -103,6 +103,21 @@ html {
   animation: marquee 25s linear infinite;
 }
 
+/* Shipping banner marquee — slower, right-to-left */
+@keyframes shipping-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-shipping-marquee {
+  animation: shipping-marquee 40s linear infinite;
+}
+
+/* Hero text fade-in-up */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Grain overlay */
 .grain-overlay::after {
   content: '';

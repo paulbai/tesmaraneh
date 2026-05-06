@@ -53,7 +53,7 @@ export function SiteNav() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[var(--cream)]/90 border-b border-[var(--cream-dark)]">
+      <nav className="fixed top-[32px] left-0 right-0 z-50 backdrop-blur-md bg-[var(--cream)]/90 border-b border-[var(--cream-dark)]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between h-16 sm:h-20 md:h-24">
           <Link href="/" className="flex items-center shrink-0" aria-label="Tesmaraneh — Home">
             <Image

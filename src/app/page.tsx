@@ -4,7 +4,6 @@ import { motion, useScroll, useTransform, useInView, AnimatePresence } from "fra
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { SpiralAnimation } from "@/components/ui/spiral-animation";
 import { CollectionModal } from "@/components/collection-modal";
 import { CartDrawer } from "@/components/cart-drawer";
 import { useCart } from "@/context/cart-context";
@@ -177,7 +176,7 @@ function Navbar() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-[32px] left-0 right-0 z-50 transition-all duration-500 ${
           scrolled || mobileOpen
             ? "backdrop-blur-md bg-[var(--cream)]/90 border-b border-[var(--cream-dark)]"
             : "bg-transparent"
@@ -306,16 +305,20 @@ function Navbar() {
 }
 
 /* ─── HERO ─── */
-/* Slideshow images for the hero card — first cover image of each SS26
- * product. Capped at 12 to keep the upfront image weight reasonable
- * (~500 KB total). Order is deterministic so server-rendered HTML
- * matches client hydration. */
-const HERO_SLIDESHOW_IMAGES: string[] = products
+/* Pairs of SS26 product images for the full-width hero slideshow.
+ * Each slide shows two images side by side (like Christie Brown).
+ * We build pairs from the first 12 SS26 cover images → 6 slides. */
+const SS26_IMAGES: string[] = products
   .filter((p) => p.collection === "ss26")
   .map((p) => p.images[0])
   .slice(0, 12);
 
-const HERO_SLIDESHOW_INTERVAL_MS = 5000;
+const HERO_PAIRS: [string, string][] = [];
+for (let i = 0; i < SS26_IMAGES.length - 1; i += 2) {
+  HERO_PAIRS.push([SS26_IMAGES[i], SS26_IMAGES[i + 1]]);
+}
+
+const HERO_INTERVAL_MS = 5000;
 
 function Hero() {
   const ref = useRef(null);
@@ -324,221 +327,118 @@ function Hero() {
     offset: ["start start", "end start"],
   });
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const [contentVisible, setContentVisible] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => setContentVisible(true), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Advance the SS26 slideshow every 5s. Effect runs once; cleared on
-  // unmount. Index wraps via modulo so the rotation loops indefinitely.
-  useEffect(() => {
-    if (HERO_SLIDESHOW_IMAGES.length <= 1) return;
+    if (HERO_PAIRS.length <= 1) return;
     const id = setInterval(() => {
-      setSlideIndex((i) => (i + 1) % HERO_SLIDESHOW_IMAGES.length);
-    }, HERO_SLIDESHOW_INTERVAL_MS);
+      setSlideIndex((i) => (i + 1) % HERO_PAIRS.length);
+    }, HERO_INTERVAL_MS);
     return () => clearInterval(id);
   }, []);
+
+  const [leftImg, rightImg] = HERO_PAIRS[slideIndex % HERO_PAIRS.length];
 
   return (
     <section
       ref={ref}
-      className="relative min-h-screen flex items-center overflow-hidden pt-16 sm:pt-20 md:pt-24 bg-black"
+      className="relative h-[calc(100vh-32px)] overflow-hidden bg-black"
     >
-      {/* Spiral Animation Background */}
-      <div className="absolute inset-0 opacity-60">
-        <SpiralAnimation />
-      </div>
-
-      <motion.div
-        style={{ opacity }}
-        className={`relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 w-full transition-all duration-[2000ms] ease-out ${
-          contentVisible ? "opacity-100" : "opacity-0 translate-y-6"
-        }`}
-      >
-        <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center min-h-[85vh] md:min-h-[80vh] py-8 md:py-0">
-          {/* Left: Text */}
-          <div className="space-y-5 sm:space-y-6 md:space-y-8">
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={contentVisible ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 1, delay: 0.3 }}
-            >
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md px-5 py-2.5 text-sm font-[family-name:var(--font-body)] tracking-widest uppercase text-white/70">
-                <Leaf size={14} className="text-[var(--ochre-light)]" />
-                Sustainable Fashion
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={contentVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="font-[family-name:var(--font-display)] text-[3.2rem] sm:text-7xl md:text-8xl lg:text-9xl font-black leading-[0.85] tracking-tight text-white"
-            >
-              WEAR
-              <br />
-              <span className="hero-text-stroke">THE</span>
-              <br />
-              <span className="text-[var(--ochre-light)]">CULTURE</span>
-            </motion.h1>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={contentVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="flex flex-wrap gap-3"
-            >
-              {["Heritage", "Craftsmanship", "Purpose"].map((word, i) => (
-                <span
-                  key={word}
-                  className="font-[family-name:var(--font-accent)] text-lg sm:text-2xl md:text-3xl italic text-white/50"
-                >
-                  {word}
-                  {i < 2 && (
-                    <span className="text-[var(--ochre-light)] mx-3">&bull;</span>
-                  )}
-                </span>
-              ))}
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={contentVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.9 }}
-              className="text-sm sm:text-base md:text-xl text-white/40 leading-relaxed max-w-md font-[family-name:var(--font-body)] font-light"
-            >
-              A Sierra Leonean clothing brand creating beautiful, timeless
-              designs for women — crafted with local, sustainable techniques
-              that empower women and artisans across the region.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={contentVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 1.1 }}
-              className="flex flex-wrap gap-4 pt-2"
-            >
-              <Link
-                href="/marketplace"
-                className="cursor-pointer group inline-flex items-center gap-2 sm:gap-3 bg-white text-black px-5 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-wide hover:bg-[var(--terracotta)] hover:text-white transition-all duration-500"
+      {/* Full-width side-by-side images with flip transition */}
+      <motion.div style={{ opacity }} className="absolute inset-0">
+        <div className="grid grid-cols-2 h-full" style={{ perspective: "1800px" }}>
+          {/* Left image */}
+          <div className="relative h-full overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={`left-${slideIndex}`}
+                initial={{ rotateY: -90, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: 90, opacity: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
+                className="absolute inset-0"
               >
-                Shop the Marketplace
-                <ArrowRight
-                  size={18}
-                  className="group-hover:translate-x-1 transition-transform duration-300"
+                <Image
+                  src={leftImg}
+                  alt="Tesmaraneh SS26 collection"
+                  fill
+                  priority={slideIndex === 0}
+                  sizes="50vw"
+                  className="object-cover"
                 />
-              </Link>
-            </motion.div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Right: Card with spiral visible through */}
-          <div className="relative hidden sm:flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={contentVisible ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="relative"
-            >
-              {/* Card */}
-              <div
-                className="relative w-[240px] h-[320px] sm:w-[280px] sm:h-[370px] md:w-[420px] md:h-[560px] rounded-[28px] sm:rounded-[40px] overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl"
-                style={{ perspective: "1600px" }}
-              >
-                {/* SS26 slideshow — 3D card flip on every transition.
-                    AnimatePresence in `mode="wait"` keeps exactly one slide
-                    mounted at a time (no zombie children), and the rotateY
-                    + perspective combo gives a real card-flipping feel
-                    rather than a flat opacity fade. */}
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={slideIndex}
-                    initial={{ rotateY: 90, opacity: 0 }}
-                    animate={{ rotateY: 0, opacity: 1 }}
-                    exit={{ rotateY: -90, opacity: 0 }}
-                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                    style={{
-                      transformStyle: "preserve-3d",
-                      backfaceVisibility: "hidden",
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={
-                        HERO_SLIDESHOW_IMAGES[
-                          slideIndex % HERO_SLIDESHOW_IMAGES.length
-                        ]
-                      }
-                      alt="Tesmaraneh SS26 collection"
-                      fill
-                      priority={slideIndex === 0}
-                      sizes="(max-width: 640px) 240px, (max-width: 768px) 280px, 420px"
-                      className="object-cover"
-                    />
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Soft vignette so the badges stay legible over any photo. */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
-              </div>
-
-              {/* Floating badges around the card */}
+          {/* Right image */}
+          <div className="relative h-full overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={contentVisible ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                className="absolute right-0 sm:-right-4 md:-right-16 top-8 sm:top-16 bg-white/10 backdrop-blur-md text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-bold tracking-wider uppercase shadow-lg border border-white/10"
+                key={`right-${slideIndex}`}
+                initial={{ rotateY: 90, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: -90, opacity: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
+                className="absolute inset-0"
               >
-                Est. 2018
+                <Image
+                  src={rightImg}
+                  alt="Tesmaraneh SS26 collection"
+                  fill
+                  priority={slideIndex === 0}
+                  sizes="50vw"
+                  className="object-cover"
+                />
               </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={contentVisible ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 1.4 }}
-                className="absolute left-0 sm:-left-4 md:-left-16 bottom-20 sm:bottom-32 bg-white/10 backdrop-blur-md text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-bold tracking-wider uppercase shadow-lg border border-white/10"
-              >
-                <span className="flex items-center gap-2">
-                  <Heart size={12} className="text-[var(--terracotta-light)] fill-[var(--terracotta-light)]" />
-                  Women Led
-                </span>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={contentVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 1.6 }}
-                className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 bg-[var(--ochre)] text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-[family-name:var(--font-body)] font-bold tracking-wider uppercase shadow-lg whitespace-nowrap"
-              >
-                <span className="flex items-center gap-2 whitespace-nowrap">
-                  <Globe size={12} className="shrink-0" />
-                  Handcrafted in Sierra Leone
-                </span>
-              </motion.div>
-            </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={contentVisible ? { opacity: 1 } : {}}
-          transition={{ duration: 1, delay: 2 }}
-          className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 hidden sm:flex"
-        >
-          <span className="text-xs tracking-[0.3em] uppercase text-white/30 font-[family-name:var(--font-body)]">
-            Scroll
-          </span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ChevronDown size={20} className="text-white/30" />
-          </motion.div>
-        </motion.div>
+        {/* Dark gradient overlay for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none" />
       </motion.div>
+
+      {/* Content overlay — bottom-center like Christie Brown */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-end pb-16 sm:pb-24 md:pb-28 px-4">
+        <h1
+          className="font-[family-name:var(--font-display)] text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white/90 text-center leading-[0.95] animate-[fadeInUp_1s_0.3s_both]"
+        >
+          SS &apos;26 IS HERE
+        </h1>
+
+        <div
+          className="mt-6 sm:mt-8 animate-[fadeInUp_0.8s_0.6s_both]"
+        >
+          <Link
+            href="/marketplace"
+            className="cursor-pointer group inline-flex items-center gap-3 bg-white text-black px-8 sm:px-10 py-3.5 sm:py-4 text-sm sm:text-base font-[family-name:var(--font-body)] font-semibold tracking-[0.15em] uppercase hover:bg-[var(--terracotta)] hover:text-white transition-all duration-500"
+          >
+            Shop Now
+            <ArrowRight
+              size={16}
+              className="group-hover:translate-x-1 transition-transform duration-300"
+            />
+          </Link>
+        </div>
+
+        {/* Slide indicators */}
+        <div className="flex gap-2 mt-8">
+          {HERO_PAIRS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setSlideIndex(i)}
+              className={`cursor-pointer w-2 h-2 rounded-full transition-all duration-500 ${
+                i === slideIndex
+                  ? "bg-white w-6"
+                  : "bg-white/40 hover:bg-white/60"
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
