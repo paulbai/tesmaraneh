@@ -118,7 +118,7 @@ export function SiteNav() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 top-16 z-40 bg-[var(--cream)] md:hidden"
+            className="fixed inset-0 top-[96px] z-40 bg-[var(--cream)] md:hidden"
           >
             <div className="flex flex-col items-center justify-center h-full gap-6 pb-20">
               {navLinks.map((link, i) => (

@@ -266,7 +266,7 @@ function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 top-16 z-40 bg-[var(--cream)] md:hidden"
+            className="fixed inset-0 top-[96px] z-40 bg-[var(--cream)] md:hidden"
           >
             <div className="flex flex-col items-center justify-center h-full gap-6 pb-20">
               {navLinks.map((link, i) => (
@@ -344,19 +344,42 @@ function Hero() {
       ref={ref}
       className="relative h-[calc(100vh-32px)] overflow-hidden bg-black"
     >
-      {/* Full-width side-by-side images with flip transition */}
+      {/* Full-width images with crossfade transition */}
       <motion.div style={{ opacity }} className="absolute inset-0">
-        <div className="grid grid-cols-2 h-full" style={{ perspective: "1800px" }}>
-          {/* Left image */}
-          <div className="relative h-full overflow-hidden">
-            <AnimatePresence mode="wait" initial={false}>
+        {/* Mobile: single image — crossfade (old stays visible under new) */}
+        <div className="sm:hidden relative h-full overflow-hidden">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={`mobile-${slideIndex}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={leftImg}
+                alt="Tesmaraneh SS26 collection"
+                fill
+                priority={slideIndex === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Tablet+: side-by-side images — crossfade */}
+        <div className="hidden sm:block relative h-full">
+          {/* Left half */}
+          <div className="absolute top-0 bottom-0 left-0 w-1/2 overflow-hidden">
+            <AnimatePresence initial={false}>
               <motion.div
                 key={`left-${slideIndex}`}
-                initial={{ rotateY: -90, opacity: 0 }}
-                animate={{ rotateY: 0, opacity: 1 }}
-                exit={{ rotateY: 90, opacity: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
                 className="absolute inset-0"
               >
                 <Image
@@ -371,16 +394,15 @@ function Hero() {
             </AnimatePresence>
           </div>
 
-          {/* Right image */}
-          <div className="relative h-full overflow-hidden">
-            <AnimatePresence mode="wait" initial={false}>
+          {/* Right half */}
+          <div className="absolute top-0 bottom-0 right-0 w-1/2 overflow-hidden">
+            <AnimatePresence initial={false}>
               <motion.div
                 key={`right-${slideIndex}`}
-                initial={{ rotateY: 90, opacity: 0 }}
-                animate={{ rotateY: 0, opacity: 1 }}
-                exit={{ rotateY: -90, opacity: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-                style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.15 }}
                 className="absolute inset-0"
               >
                 <Image
