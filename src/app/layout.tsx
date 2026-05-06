@@ -99,7 +99,9 @@ export default function RootLayout({
       <body>
         <CartProvider>
           <ShippingBanner />
-          {children}
+          <div className="pt-[32px]">
+            {children}
+          </div>
         </CartProvider>
       </body>
     </html>

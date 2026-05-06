@@ -13,7 +13,7 @@ export function ShippingBanner() {
   ));
 
   return (
-    <div className="bg-[var(--charcoal)] py-2 overflow-hidden relative z-[60]">
+    <div className="fixed top-0 left-0 right-0 bg-[var(--charcoal)] py-2 overflow-hidden z-[60]">
       <div className="animate-shipping-marquee flex whitespace-nowrap">
         {items}
         {items}
