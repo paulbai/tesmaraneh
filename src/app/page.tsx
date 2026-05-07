@@ -503,6 +503,8 @@ function MarqueeStrip() {
 
 /* ─── ABOUT SECTION ─── */
 function About() {
+  const [embedOpen, setEmbedOpen] = useState<"wia" | "tef" | null>(null);
+
   return (
     <section id="about" className="py-16 sm:py-24 md:py-36 bg-[var(--cream)] relative">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
@@ -598,7 +600,10 @@ function About() {
 
             <AnimatedSection delay={0.5}>
               <div className="flex flex-wrap gap-4 pt-4">
-                <div className="flex items-center gap-3 bg-white rounded-2xl px-5 py-3 shadow-sm border border-[var(--cream-dark)]">
+                <button
+                  onClick={() => setEmbedOpen("wia")}
+                  className="cursor-pointer flex items-center gap-3 bg-white rounded-2xl px-5 py-3 shadow-sm border border-[var(--cream-dark)] hover:border-[var(--terracotta)] hover:shadow-md transition-all duration-300 text-left"
+                >
                   <div className="w-10 h-10 rounded-full bg-[var(--terracotta)]/10 flex items-center justify-center">
                     <Award size={18} className="text-[var(--terracotta)]" />
                   </div>
@@ -610,8 +615,11 @@ function About() {
                       Women in Africa
                     </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white rounded-2xl px-5 py-3 shadow-sm border border-[var(--cream-dark)]">
+                </button>
+                <button
+                  onClick={() => setEmbedOpen("tef")}
+                  className="cursor-pointer flex items-center gap-3 bg-white rounded-2xl px-5 py-3 shadow-sm border border-[var(--cream-dark)] hover:border-[var(--indigo)] hover:shadow-md transition-all duration-300 text-left"
+                >
                   <div className="w-10 h-10 rounded-full bg-[var(--indigo)]/10 flex items-center justify-center">
                     <Sparkles size={18} className="text-[var(--indigo)]" />
                   </div>
@@ -623,9 +631,54 @@ function About() {
                       Tony Elumelu Foundation
                     </p>
                   </div>
-                </div>
+                </button>
               </div>
             </AnimatedSection>
+
+            {/* Embed popup for award cards */}
+            <AnimatePresence>
+              {embedOpen && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                  onClick={() => setEmbedOpen(null)}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="relative w-full max-w-3xl aspect-video bg-white rounded-2xl overflow-hidden shadow-2xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => setEmbedOpen(null)}
+                      className="cursor-pointer absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors text-lg leading-none"
+                      aria-label="Close"
+                    >
+                      &times;
+                    </button>
+                    {embedOpen === "wia" ? (
+                      <iframe
+                        src="https://www.youtube.com/embed/_C31Im9OjPc?autoplay=1"
+                        title="WIA Laureates 2021"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <iframe
+                        src="https://tonyelumelufoundation.org/wp-content/uploads/2019/03/TEF-2019-Selected-Entrepreneurs.pdf"
+                        title="TEF 2019 Selected Entrepreneurs"
+                        className="w-full h-full"
+                      />
+                    )}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* About CTA */}
             <AnimatedSection delay={0.6}>
