@@ -512,43 +512,26 @@ function About() {
           {/* Image side */}
           <AnimatedSection>
             <div className="relative">
-              <div className="w-full aspect-[3/4] rounded-[32px] bg-gradient-to-br from-[var(--indigo)] to-[var(--indigo-light)] overflow-hidden relative">
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-10">
-                  <div className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center mb-6">
-                    <Users size={32} className="text-white/60" />
-                  </div>
-                  <p className="font-[family-name:var(--font-accent)] text-3xl sm:text-4xl md:text-5xl italic text-center leading-tight">
+              <div className="w-full aspect-[3/4] rounded-[32px] overflow-hidden relative">
+                <Image
+                  src="/founder.jpg"
+                  alt="Isatu Bundu — Founder & Designer of Tesmaraneh"
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
+                  <p className="font-[family-name:var(--font-accent)] text-2xl sm:text-3xl md:text-4xl italic leading-tight">
                     Isatu Bundu
                   </p>
-                  <p className="font-[family-name:var(--font-body)] text-sm tracking-widest uppercase mt-4 opacity-60">
+                  <p className="font-[family-name:var(--font-body)] text-xs sm:text-sm tracking-widest uppercase mt-2 opacity-70">
                     Founder & Designer
                   </p>
-                  <div className="mt-6 px-4 py-1.5 rounded-full border border-white/20 text-xs tracking-wider uppercase opacity-60">
+                  <div className="mt-3 inline-block px-4 py-1.5 rounded-full border border-white/30 text-[10px] sm:text-xs tracking-wider uppercase opacity-70">
                     Winner &middot; Women in Africa 2021
                   </div>
-                </div>
-                {/* Decorative pattern */}
-                <div className="absolute inset-0 opacity-5">
-                  <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <pattern
-                        id="zigzag"
-                        x="0"
-                        y="0"
-                        width="40"
-                        height="40"
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <path
-                          d="M0 20 L10 0 L20 20 L30 0 L40 20"
-                          fill="none"
-                          stroke="white"
-                          strokeWidth="1.5"
-                        />
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#zigzag)" />
-                  </svg>
                 </div>
               </div>
 
