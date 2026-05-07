@@ -20,8 +20,8 @@ import { CartDrawer } from "@/components/cart-drawer";
 type Filter = "ss26" | "all" | "gara" | "batik" | "woven";
 
 const filters: { key: Filter; label: string; hint: string; archive?: boolean }[] = [
-  { key: "ss26", label: "SS26 Summer", hint: "In stock now" },
   { key: "all", label: "All", hint: "Every piece" },
+  { key: "ss26", label: "SS26 Summer", hint: "In stock now" },
   { key: "gara", label: "Gara Tie-Dye", hint: "Archive", archive: true },
   { key: "batik", label: "Batik", hint: "Archive", archive: true },
   { key: "woven", label: "Woven Cloth", hint: "Archive", archive: true },
@@ -257,7 +257,7 @@ export default function MarketplacePage() {
         </section>
 
         {/* Filters */}
-        <section className="sticky top-16 sm:top-20 md:top-24 z-30 bg-[var(--cream)]/95 backdrop-blur-md border-b border-[var(--cream-dark)]">
+        <section className="sticky top-[96px] sm:top-[112px] md:top-[128px] z-30 bg-[var(--cream)]/95 backdrop-blur-md border-b border-[var(--cream-dark)]">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 py-4 flex items-center gap-3 overflow-x-auto">
             <div className="flex items-center gap-2 text-[var(--warm-gray)] shrink-0 hidden sm:flex">
               <Filter size={14} />
