@@ -7,7 +7,7 @@ import { ImageResponse } from "next/og";
  *  large-image card size. */
 
 export const alt =
-  "Tesmaraneh — Ethical Fashion, Made in the Provinces of Sierra Leone";
+  "Tesmaraneh — Sustainable Slow Fashion, Made by Artisans in Sierra Leone";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -101,7 +101,7 @@ export default async function OpengraphImage() {
               maxWidth: 980,
             }}
           >
-            Ethical Fashion,
+            Sustainable Slow Fashion,
           </div>
           <div
             style={{
@@ -114,7 +114,7 @@ export default async function OpengraphImage() {
               marginTop: 8,
             }}
           >
-            Rooted in Sierra Leone.
+            Made by Artisans.
           </div>
         </div>
 

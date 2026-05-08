@@ -40,7 +40,7 @@ const bagel = Bagel_Fat_One({
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.tesmaranehclothing.com";
 
-const TITLE = "Tesmaraneh — Ethical Fashion, Made in Sierra Leone";
+const TITLE = "Tesmaraneh — Sustainable Slow Fashion, Made by Artisans";
 const DESCRIPTION =
   "Hand-batiked, hand-tailored clothing for women — made in the provinces of Sierra Leone. Shop the SS26 Summer Collection.";
 
