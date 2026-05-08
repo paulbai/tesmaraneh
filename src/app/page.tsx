@@ -520,6 +520,7 @@ function About() {
                   className="object-cover object-top"
                   sizes="(max-width: 768px) 100vw, 50vw"
                   priority
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
