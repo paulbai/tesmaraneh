@@ -258,14 +258,14 @@ export default function MarketplacePage() {
 
         {/* Filters */}
         <section className="sticky top-[96px] sm:top-[112px] md:top-[128px] z-30 bg-[var(--cream)]/95 backdrop-blur-md border-b border-[var(--cream-dark)]">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 py-4 flex items-center gap-3 overflow-x-auto">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 py-4 flex items-center gap-3">
             <div className="flex items-center gap-2 text-[var(--warm-gray)] shrink-0 hidden sm:flex">
               <Filter size={14} />
               <span className="text-xs font-[family-name:var(--font-body)] tracking-widest uppercase">
                 Filter
               </span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {filters.map((f) => (
                 <button
                   key={f.key}

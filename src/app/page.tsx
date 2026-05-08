@@ -537,7 +537,7 @@ function About() {
               </div>
 
               {/* Decorative offset box */}
-              <div className="absolute -bottom-6 -right-6 w-[60%] h-[40%] rounded-[24px] border-2 border-[var(--ochre)]/30 -z-10" />
+              <div className="absolute -bottom-6 -right-6 w-[60%] h-[40%] rounded-[24px] border-2 border-[var(--ochre)]/30 -z-10 hidden md:block" />
             </div>
           </AnimatedSection>
 
