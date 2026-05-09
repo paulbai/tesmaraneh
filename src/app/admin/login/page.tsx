@@ -25,7 +25,7 @@ export default async function AdminLoginPage() {
               Sign in
             </h1>
             <p className="mt-2 text-sm text-stone-500">
-              Access the order dashboard.
+              Enter your email to receive a login code.
             </p>
           </div>
           <LoginForm />

@@ -111,23 +111,6 @@ export async function getCurrentAdmin(): Promise<{
   return row ?? null;
 }
 
-/** Constant-time password comparison against the env-configured password.
- *  Throws if ADMIN_PASSWORD is unset so misconfiguration fails loudly. */
-export function verifyAdminPassword(input: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) {
-    throw new Error("ADMIN_PASSWORD is not configured.");
-  }
-  const a = Buffer.from(input, "utf8");
-  const b = Buffer.from(expected, "utf8");
-  if (a.length !== b.length) {
-    // Burn time comparing to prevent length-based side channel.
-    timingSafeEqual(a, a);
-    return false;
-  }
-  return timingSafeEqual(a, b);
-}
-
 export const SESSION_COOKIE = COOKIE_NAME;
 export const SESSION_MAX_AGE = SESSION_TTL_SECONDS;
 

@@ -2,6 +2,7 @@ import {
   pgTable,
   text,
   integer,
+  boolean,
   timestamp,
   uuid,
   pgEnum,
@@ -124,6 +125,24 @@ export const notificationPhones = pgTable("notification_phones", {
     .defaultNow()
     .notNull(),
 });
+
+/** OTP codes for passwordless admin login. Short-lived, single-use. */
+export const adminOtps = pgTable(
+  "admin_otps",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: text("email").notNull(),
+    code: text("code").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    used: boolean("used").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => ({
+    emailIdx: index("admin_otps_email_idx").on(t.email),
+  })
+);
 
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;

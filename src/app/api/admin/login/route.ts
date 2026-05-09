@@ -1,49 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
+import { randomInt } from "node:crypto";
 import { db } from "@/lib/db";
-import { admins } from "@/lib/db/schema";
-import {
-  SESSION_COOKIE,
-  SESSION_MAX_AGE,
-  signSession,
-  verifyAdminPassword,
-} from "@/lib/auth";
+import { admins, adminOtps } from "@/lib/db/schema";
+import { SESSION_COOKIE, SESSION_MAX_AGE, signSession } from "@/lib/auth";
+import { sendOtpEmail } from "@/lib/email";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 type LoginBody = {
   email?: string;
-  password?: string;
+  otp?: string;
+  step?: "request" | "verify";
 };
 
-// Loose RFC-5321 shape — local-part@domain.tld. Stops obvious junk before
-// we hit the DB; not a strict validator (we don't need that — the admins
-// allowlist is the real check).
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 
-const LOGIN_RATE_LIMIT = {
-  capacity: 5, // 5 attempts in window
+const OTP_TTL_MS = 10 * 60_000; // 10 minutes
+
+const REQUEST_RATE_LIMIT = {
+  capacity: 5,
   refillTokens: 5,
-  windowMs: 15 * 60_000, // per 15 minutes
+  windowMs: 15 * 60_000,
 };
 
+const VERIFY_RATE_LIMIT = {
+  capacity: 8,
+  refillTokens: 8,
+  windowMs: 15 * 60_000,
+};
+
+/** Generate a 6-digit numeric OTP. */
+function generateOtp(): string {
+  return String(randomInt(100000, 999999));
+}
+
 export async function POST(req: NextRequest) {
-  // Per-IP throttle so a credential-stuffing bot can't hammer this endpoint.
-  // (See lib/rate-limit.ts for the serverless caveat — this is best-effort.)
   const ip = clientIp(req);
-  const limit = rateLimit(`admin-login:${ip}`, LOGIN_RATE_LIMIT);
-  if (!limit.ok) {
-    return NextResponse.json(
-      { error: "Too many attempts. Try again later." },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)),
-        },
-      }
-    );
-  }
 
   let body: LoginBody;
   try {
@@ -53,54 +47,121 @@ export async function POST(req: NextRequest) {
   }
 
   const email = body.email?.trim().toLowerCase() ?? "";
-  const password = body.password ?? "";
+  if (!email || !EMAIL_RE.test(email) || email.length > 320) {
+    return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+  }
 
-  if (!email || !password) {
+  // ─── Step 1: Request OTP ───
+  if (body.step === "request" || !body.otp) {
+    const limit = rateLimit(`otp-request:${ip}`, REQUEST_RATE_LIMIT);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many attempts. Try again later." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } }
+      );
+    }
+
+    // Check if email is in admin allowlist
+    const [admin] = await db
+      .select({ id: admins.id })
+      .from(admins)
+      .where(eq(admins.email, email))
+      .limit(1);
+
+    // Always respond the same way to avoid leaking which emails are admins
+    if (!admin) {
+      // Burn a small delay to keep timing consistent
+      await new Promise((r) => setTimeout(r, 200 + Math.random() * 300));
+      return NextResponse.json({ ok: true, message: "If this email is registered, a code has been sent." });
+    }
+
+    const code = generateOtp();
+    const expiresAt = new Date(Date.now() + OTP_TTL_MS);
+
+    // Store OTP
+    await db.insert(adminOtps).values({
+      email,
+      code,
+      expiresAt,
+    });
+
+    // Send email
+    const sent = await sendOtpEmail(email, code);
+    if (!sent) {
+      console.error("[admin login] Failed to send OTP email to", email);
+      // Still return success to avoid leaking info
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "If this email is registered, a code has been sent.",
+    });
+  }
+
+  // ─── Step 2: Verify OTP ───
+  const otp = body.otp?.trim() ?? "";
+  if (!otp || !/^\d{6}$/.test(otp)) {
+    return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
+  }
+
+  const limit = rateLimit(`otp-verify:${ip}`, VERIFY_RATE_LIMIT);
+  if (!limit.ok) {
     return NextResponse.json(
-      { error: "Email and password are required" },
-      { status: 400 }
+      { error: "Too many attempts. Try again later." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } }
     );
   }
-  if (email.length > 320 || password.length > 200 || !EMAIL_RE.test(email)) {
+
+  // Find a valid, unused OTP for this email
+  const [otpRow] = await db
+    .select()
+    .from(adminOtps)
+    .where(
+      and(
+        eq(adminOtps.email, email),
+        eq(adminOtps.code, otp),
+        eq(adminOtps.used, false),
+        gt(adminOtps.expiresAt, new Date())
+      )
+    )
+    .limit(1);
+
+  if (!otpRow) {
     return NextResponse.json(
-      { error: "Invalid email or password" },
+      { error: "Invalid or expired code. Please request a new one." },
       { status: 401 }
     );
   }
 
-  // Lookup admin first. We still run password verification on a miss to
-  // keep login timing constant (don't leak which emails are admins).
+  // Mark OTP as used
+  await db
+    .update(adminOtps)
+    .set({ used: true })
+    .where(eq(adminOtps.id, otpRow.id));
+
+  // Verify admin still exists
   const [admin] = await db
     .select({ id: admins.id, email: admins.email })
     .from(admins)
     .where(eq(admins.email, email))
     .limit(1);
 
-  let passwordOk: boolean;
-  try {
-    passwordOk = verifyAdminPassword(password);
-  } catch (err) {
-    console.error("[admin login] password env missing:", err);
+  if (!admin) {
     return NextResponse.json(
-      { error: "Server auth misconfigured" },
-      { status: 500 }
-    );
-  }
-
-  if (!admin || !passwordOk) {
-    return NextResponse.json(
-      { error: "Invalid email or password" },
+      { error: "Account not found" },
       { status: 401 }
     );
   }
 
+  // Update last login
   await db
     .update(admins)
     .set({ lastLoginAt: new Date() })
     .where(eq(admins.id, admin.id));
 
+  // Create session
   const token = signSession(admin.email);
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true, verified: true });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
