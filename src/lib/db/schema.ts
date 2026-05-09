@@ -113,8 +113,21 @@ export const admins = pgTable("admins", {
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
 });
 
+/** Phone numbers that receive an SMS when a new order is placed.
+ *  Capped at 3 rows (enforced at the API level). */
+export const notificationPhones = pgTable("notification_phones", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  phone: text("phone").notNull().unique(),
+  label: text("label"), // e.g. "Owner", "Manager"
+  addedBy: text("added_by"),
+  addedAt: timestamp("added_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type NewOrderItem = typeof orderItems.$inferInsert;
 export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
+export type NotificationPhone = typeof notificationPhones.$inferSelect;

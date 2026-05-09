@@ -33,6 +33,12 @@ export default async function AuthedAdminLayout({
               >
                 Orders
               </Link>
+              <Link
+                href="/admin/settings"
+                className="px-3 py-1.5 rounded-md text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+              >
+                Settings
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-3">

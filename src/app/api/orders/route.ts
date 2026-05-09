@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
-import { orders, orderItems, orderStatusHistory } from "@/lib/db/schema";
+import {
+  orders,
+  orderItems,
+  orderStatusHistory,
+  notificationPhones,
+} from "@/lib/db/schema";
 import { getProductById } from "@/lib/products";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { notifyNewOrder } from "@/lib/sms";
 
 /** Runs on Node — needs pg driver, not Edge. */
 export const runtime = "nodejs";
@@ -226,6 +232,25 @@ export async function POST(req: NextRequest) {
       changedBy: "system",
       note: "Order created from checkout",
     });
+
+    // Fire SMS notification to configured phone numbers (best-effort, non-blocking).
+    // We don't await this — the customer gets their response immediately.
+    db.select({ phone: notificationPhones.phone })
+      .from(notificationPhones)
+      .then((rows) => {
+        const phones = rows.map((r) => r.phone);
+        if (phones.length > 0) {
+          notifyNewOrder(phones, {
+            reference,
+            customerName: customer.name,
+            itemCount,
+            totalSll,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("[orders] Failed to fetch notification phones:", err);
+      });
 
     return NextResponse.json({
       reference,
