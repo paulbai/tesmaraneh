@@ -41,6 +41,16 @@ export async function sendSms(
   ).toString("base64");
 
   try {
+    const toNumber = to.startsWith("+") ? to : `+${to}`;
+    const payload = {
+      from: SENDER_ID,
+      to: toNumber,
+      content,
+      ...(reference ? { reference } : {}),
+    };
+
+    console.log("[sms] Sending to AppHiveSL:", JSON.stringify({ to: toNumber, from: SENDER_ID, contentLen: content.length }));
+
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
@@ -48,19 +58,14 @@ export async function sendSms(
         Authorization: `Basic ${basicAuth}`,
         "X-Wallet": `Token ${creds.token}`,
       },
-      body: JSON.stringify({
-        From: SENDER_ID,
-        To: to.startsWith("+") ? to : `+${to}`,
-        Content: content,
-        ...(reference ? { Reference: reference } : {}),
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       console.error(
-        `[sms] AppHiveSL returned ${res.status} for To=${to.startsWith("+") ? to : `+${to}`}:`,
-        text
+        `[sms] AppHiveSL error ${res.status}:`,
+        text.slice(0, 500)
       );
       return false;
     }
