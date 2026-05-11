@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { randomInt, createHash } from "node:crypto";
 import { db } from "@/lib/db";
-import { admins, adminOtps } from "@/lib/db/schema";
+import { admins, adminOtps, notificationPhones } from "@/lib/db/schema";
 import { SESSION_COOKIE, SESSION_MAX_AGE, signSession } from "@/lib/auth";
 import { sendSms } from "@/lib/sms";
 import { normalizePhone } from "@/lib/phone";
@@ -220,6 +220,23 @@ export async function POST(req: NextRequest) {
     .update(admins)
     .set({ lastLoginAt: new Date() })
     .where(eq(admins.id, admin.id));
+
+  // Auto-enroll in SMS notifications on first login (if under the 3-phone cap)
+  const existingNotif = await db
+    .select({ id: notificationPhones.id })
+    .from(notificationPhones)
+    .where(eq(notificationPhones.phone, phone))
+    .limit(1);
+
+  if (existingNotif.length === 0) {
+    const allNotif = await db.select().from(notificationPhones);
+    if (allNotif.length < 3) {
+      await db
+        .insert(notificationPhones)
+        .values({ phone, label: "Auto-added on login", addedBy: phone })
+        .onConflictDoNothing();
+    }
+  }
 
   // Create session
   const token = signSession(admin.phone);
