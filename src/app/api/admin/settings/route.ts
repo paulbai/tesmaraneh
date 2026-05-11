@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { notificationPhones } from "@/lib/db/schema";
 import { getCurrentAdmin } from "@/lib/auth";
+import { normalizePhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 
@@ -43,20 +44,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Normalize: strip spaces, dashes, parentheses. Keep leading +.
-  let phone = rawPhone.replace(/[\s\-()]/g, "");
-
-  // If starts with +, strip the +
-  if (phone.startsWith("+")) {
-    phone = phone.slice(1);
-  }
-
-  // Must be digits only and reasonable length (8-15 digits per E.164)
-  if (!/^\d{8,15}$/.test(phone)) {
+  const phone = normalizePhone(rawPhone);
+  if (!phone) {
     return NextResponse.json(
       {
         error:
-          "Invalid phone number. Use full international format, e.g. 23230123456",
+          "Invalid phone number. Try 23275696192, +23275696192, or 075696192",
       },
       { status: 400 }
     );

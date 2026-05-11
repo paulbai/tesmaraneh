@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { admins, adminOtps } from "@/lib/db/schema";
 import { SESSION_COOKIE, SESSION_MAX_AGE, signSession } from "@/lib/auth";
 import { sendSms } from "@/lib/sms";
+import { normalizePhone } from "@/lib/phone";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -34,13 +35,6 @@ function generateOtp(): string {
   return String(randomInt(100000, 999999));
 }
 
-/** Normalize phone: strip spaces, dashes, parens, leading + */
-function normalizePhone(raw: string): string {
-  let phone = raw.replace(/[\s\-()]/g, "");
-  if (phone.startsWith("+")) phone = phone.slice(1);
-  return phone;
-}
-
 export async function POST(req: NextRequest) {
   const ip = clientIp(req);
 
@@ -52,9 +46,9 @@ export async function POST(req: NextRequest) {
   }
 
   const phone = normalizePhone(body.phone ?? "");
-  if (!phone || !/^\d{8,15}$/.test(phone)) {
+  if (!phone) {
     return NextResponse.json(
-      { error: "Enter a valid phone number (e.g. 23230123456)" },
+      { error: "Enter a valid phone number (e.g. 23275696192 or 075696192)" },
       { status: 400 }
     );
   }

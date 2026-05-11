@@ -177,11 +177,11 @@ export function LoginForm() {
             required
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="e.g. 23230123456"
+            placeholder="e.g. 075696192 or 23275696192"
             className="w-full px-4 py-2.5 rounded-lg border border-stone-200 bg-white text-stone-900 font-mono placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)]/40 focus:border-[var(--terracotta)] transition-all"
           />
           <p className="text-xs text-stone-400 mt-1.5">
-            Full international format without the + sign
+            Enter with or without country code (e.g. 075696192 or +23275696192)
           </p>
         </div>
 
