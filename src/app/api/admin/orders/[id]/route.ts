@@ -68,8 +68,8 @@ export async function PATCH(
     orderId: order.id,
     fromStatus: order.status,
     toStatus: nextStatus,
-    changedBy: admin.email,
-    note: body.note?.trim() || null,
+    changedBy: admin.email ?? admin.phone,
+    note: body.note?.trim().slice(0, 500) || null,
   });
 
   return NextResponse.json({ ok: true });

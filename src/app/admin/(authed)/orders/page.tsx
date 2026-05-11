@@ -48,7 +48,9 @@ export default async function OrdersPage({
   const conditions = [];
   if (statusFilter) conditions.push(eq(orders.status, statusFilter));
   if (q) {
-    const like = `%${q}%`;
+    // Escape ILIKE wildcards to prevent unintended pattern matching
+    const escaped = q.replace(/%/g, "\\%").replace(/_/g, "\\_");
+    const like = `%${escaped}%`;
     conditions.push(
       or(
         ilike(orders.reference, like),

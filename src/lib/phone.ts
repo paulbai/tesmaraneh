@@ -36,11 +36,11 @@ export function normalizePhone(raw: string): string | null {
   if (SL_LOCAL_REGEX.test(phone)) {
     phone = SL_COUNTRY_CODE + phone.slice(1); // drop the 0, prepend 232
   }
-
-  // Case 2: Bare subscriber number (e.g. 75696192)
-  if (SL_SUBSCRIBER_REGEX.test(phone)) {
+  // Case 2: Bare subscriber number without 0 (e.g. 75696192)
+  else if (SL_SUBSCRIBER_REGEX.test(phone)) {
     phone = SL_COUNTRY_CODE + phone;
   }
+  // Case 3: Already has country code (e.g. 23275696192) — no transformation
 
   // Final validation: must be 8-15 digits (E.164 range)
   if (!/^\d{8,15}$/.test(phone)) return null;
