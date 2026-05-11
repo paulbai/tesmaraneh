@@ -50,7 +50,7 @@ export async function sendSms(
       },
       body: JSON.stringify({
         From: SENDER_ID,
-        To: to,
+        To: to.startsWith("+") ? to : `+${to}`,
         Content: content,
         ...(reference ? { Reference: reference } : {}),
       }),
@@ -58,7 +58,10 @@ export async function sendSms(
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      console.error(`[sms] AppHiveSL returned ${res.status}:`, text);
+      console.error(
+        `[sms] AppHiveSL returned ${res.status} for To=${to.startsWith("+") ? to : `+${to}`}:`,
+        text
+      );
       return false;
     }
 
