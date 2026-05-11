@@ -139,7 +139,7 @@ export function AdminManager({ initialAdmins }: { initialAdmins: Admin[] }) {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. 075696192"
+              placeholder="e.g. +23275696192"
               required
               className="flex-1 px-3 py-2 rounded-lg border border-stone-200 bg-white text-sm font-mono placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)]/40 focus:border-[var(--terracotta)] transition-all"
             />

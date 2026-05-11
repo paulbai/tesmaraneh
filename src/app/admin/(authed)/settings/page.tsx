@@ -46,7 +46,7 @@ export default async function SettingsPage() {
           </h2>
           <p className="text-xs text-stone-500 mt-1">
             Add up to 3 phone numbers to receive an SMS when a new order is
-            placed (e.g. 075696192 or 23275696192).
+            placed. Include country code (e.g. +23275696192).
           </p>
         </header>
         <div className="p-5">
