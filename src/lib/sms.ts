@@ -53,18 +53,40 @@ export async function sendSms(
     }
 
     const url = `${API_BASE}?${params.toString()}`;
+
+    // Debug: log the request (mask secrets)
+    console.log("[sms] DEBUG request:", {
+      method: "GET",
+      to: toNumber,
+      from: SENDER_ID,
+      contentLength: content.length,
+      hasClientId: !!creds.clientId,
+      hasClientSecret: !!creds.clientSecret,
+      hasToken: !!creds.token,
+      clientIdPrefix: creds.clientId.slice(0, 6),
+      tokenPrefix: creds.token.slice(0, 6),
+    });
+
     const res = await fetch(url, { method: "GET" });
+    const responseText = await res.text().catch(() => "");
+
+    console.log("[sms] DEBUG response:", {
+      status: res.status,
+      statusText: res.statusText,
+      body: responseText.slice(0, 1000),
+      headers: Object.fromEntries(res.headers.entries()),
+    });
 
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
       console.error(
         `[sms] AppHiveSL GET returned ${res.status} for to=${toNumber}:`,
-        text.slice(0, 500)
+        responseText.slice(0, 500)
       );
       return false;
     }
 
-    const data = await res.json().catch(() => null);
+    let data = null;
+    try { data = JSON.parse(responseText); } catch {}
     console.log("[sms] AppHiveSL response:", JSON.stringify(data));
     return true;
   } catch (err) {
