@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-type Step = "email" | "otp";
+type Step = "phone" | "otp";
 
 export function LoginForm() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("email");
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<Step>("phone");
+  const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -16,14 +16,12 @@ export function LoginForm() {
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Focus first OTP input when step changes to otp
   useEffect(() => {
     if (step === "otp") {
       inputRefs.current[0]?.focus();
     }
   }, [step]);
 
-  // Countdown timer for resend cooldown
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
@@ -32,7 +30,7 @@ export function LoginForm() {
 
   async function requestOtp(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!phone.trim()) return;
 
     setError(null);
     setSubmitting(true);
@@ -40,7 +38,7 @@ export function LoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, step: "request" }),
+        body: JSON.stringify({ phone, step: "request" }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as {
@@ -67,7 +65,7 @@ export function LoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: code, step: "verify" }),
+        body: JSON.stringify({ phone, otp: code, step: "verify" }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -97,7 +95,7 @@ export function LoginForm() {
       await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, step: "request" }),
+        body: JSON.stringify({ phone, step: "request" }),
       });
       setResendCooldown(60);
       setOtp(["", "", "", "", "", ""]);
@@ -110,21 +108,17 @@ export function LoginForm() {
   }
 
   function handleOtpChange(index: number, value: string) {
-    // Only allow digits
     if (value && !/^\d$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-advance to next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all 6 digits entered
     if (value && index === 5 && newOtp.every((d) => d !== "")) {
-      // Small delay so the user sees the last digit fill in
       setTimeout(() => verifyOtp(), 150);
     }
   }
@@ -137,7 +131,10 @@ export function LoginForm() {
 
   function handleOtpPaste(e: React.ClipboardEvent) {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     if (!pasted) return;
 
     const newOtp = [...otp];
@@ -146,40 +143,46 @@ export function LoginForm() {
     }
     setOtp(newOtp);
 
-    // Focus last filled or next empty
     const focusIdx = Math.min(pasted.length, 5);
     inputRefs.current[focusIdx]?.focus();
 
-    // Auto-submit if all 6
     if (pasted.length === 6) {
-      setTimeout(() => {
-        setOtp(newOtp);
-        verifyOtp();
-      }, 150);
+      setTimeout(() => verifyOtp(), 150);
     }
   }
 
-  // ─── Step 1: Enter email ───
-  if (step === "email") {
+  // Format phone for display
+  function displayPhone(p: string): string {
+    const cleaned = p.replace(/[\s\-()]/g, "");
+    if (cleaned.startsWith("+")) return cleaned;
+    if (cleaned.startsWith("232")) return `+${cleaned}`;
+    return cleaned;
+  }
+
+  // ─── Step 1: Enter phone ───
+  if (step === "phone") {
     return (
       <form onSubmit={requestOtp} className="space-y-5">
         <div>
           <label
-            htmlFor="email"
+            htmlFor="phone"
             className="block text-xs font-medium tracking-wide uppercase text-stone-500 mb-1.5"
           >
-            Email
+            Phone number
           </label>
           <input
-            id="email"
-            type="email"
-            autoComplete="email"
+            id="phone"
+            type="tel"
+            autoComplete="tel"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full px-4 py-2.5 rounded-lg border border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)]/40 focus:border-[var(--terracotta)] transition-all"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="e.g. 23230123456"
+            className="w-full px-4 py-2.5 rounded-lg border border-stone-200 bg-white text-stone-900 font-mono placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)]/40 focus:border-[var(--terracotta)] transition-all"
           />
+          <p className="text-xs text-stone-400 mt-1.5">
+            Full international format without the + sign
+          </p>
         </div>
 
         {error && (
@@ -206,19 +209,19 @@ export function LoginForm() {
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <p className="text-sm text-stone-600">
-          We sent a 6-digit code to
+        <p className="text-sm text-stone-600">We sent a 6-digit code to</p>
+        <p className="text-sm font-semibold font-mono text-stone-900 mt-0.5">
+          {displayPhone(phone)}
         </p>
-        <p className="text-sm font-semibold text-stone-900 mt-0.5">{email}</p>
         <button
           onClick={() => {
-            setStep("email");
+            setStep("phone");
             setOtp(["", "", "", "", "", ""]);
             setError(null);
           }}
           className="text-xs text-[var(--terracotta)] hover:underline mt-1"
         >
-          Change email
+          Change number
         </button>
       </div>
 
@@ -227,7 +230,9 @@ export function LoginForm() {
         {otp.map((digit, i) => (
           <input
             key={i}
-            ref={(el) => { inputRefs.current[i] = el; }}
+            ref={(el) => {
+              inputRefs.current[i] = el;
+            }}
             type="text"
             inputMode="numeric"
             autoComplete={i === 0 ? "one-time-code" : "off"}

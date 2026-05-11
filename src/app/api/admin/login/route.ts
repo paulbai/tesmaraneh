@@ -4,18 +4,16 @@ import { randomInt } from "node:crypto";
 import { db } from "@/lib/db";
 import { admins, adminOtps } from "@/lib/db/schema";
 import { SESSION_COOKIE, SESSION_MAX_AGE, signSession } from "@/lib/auth";
-import { sendOtpEmail } from "@/lib/email";
+import { sendSms } from "@/lib/sms";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 type LoginBody = {
-  email?: string;
+  phone?: string;
   otp?: string;
   step?: "request" | "verify";
 };
-
-const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 
 const OTP_TTL_MS = 10 * 60_000; // 10 minutes
 
@@ -36,6 +34,13 @@ function generateOtp(): string {
   return String(randomInt(100000, 999999));
 }
 
+/** Normalize phone: strip spaces, dashes, parens, leading + */
+function normalizePhone(raw: string): string {
+  let phone = raw.replace(/[\s\-()]/g, "");
+  if (phone.startsWith("+")) phone = phone.slice(1);
+  return phone;
+}
+
 export async function POST(req: NextRequest) {
   const ip = clientIp(req);
 
@@ -46,9 +51,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const email = body.email?.trim().toLowerCase() ?? "";
-  if (!email || !EMAIL_RE.test(email) || email.length > 320) {
-    return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+  const phone = normalizePhone(body.phone ?? "");
+  if (!phone || !/^\d{8,15}$/.test(phone)) {
+    return NextResponse.json(
+      { error: "Enter a valid phone number (e.g. 23230123456)" },
+      { status: 400 }
+    );
   }
 
   // ─── Step 1: Request OTP ───
@@ -57,22 +65,29 @@ export async function POST(req: NextRequest) {
     if (!limit.ok) {
       return NextResponse.json(
         { error: "Too many attempts. Try again later." },
-        { status: 429, headers: { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } }
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)),
+          },
+        }
       );
     }
 
-    // Check if email is in admin allowlist
+    // Check if phone is in admin allowlist
     const [admin] = await db
       .select({ id: admins.id })
       .from(admins)
-      .where(eq(admins.email, email))
+      .where(eq(admins.phone, phone))
       .limit(1);
 
-    // Always respond the same way to avoid leaking which emails are admins
+    // Always respond the same to avoid leaking which phones are admins
     if (!admin) {
-      // Burn a small delay to keep timing consistent
       await new Promise((r) => setTimeout(r, 200 + Math.random() * 300));
-      return NextResponse.json({ ok: true, message: "If this email is registered, a code has been sent." });
+      return NextResponse.json({
+        ok: true,
+        message: "If this number is registered, a code has been sent.",
+      });
     }
 
     const code = generateOtp();
@@ -80,45 +95,53 @@ export async function POST(req: NextRequest) {
 
     // Store OTP
     await db.insert(adminOtps).values({
-      email,
+      phone,
       code,
       expiresAt,
     });
 
-    // Send email
-    const sent = await sendOtpEmail(email, code);
+    // Send SMS
+    const msg = `${code} is your Tesmaraneh admin login code. It expires in 10 minutes.`;
+    const sent = await sendSms(phone, msg, `admin-otp-${Date.now()}`);
     if (!sent) {
-      console.error("[admin login] Failed to send OTP email to", email);
-      // Still return success to avoid leaking info
+      console.error("[admin login] Failed to send OTP SMS to", phone);
     }
 
     return NextResponse.json({
       ok: true,
-      message: "If this email is registered, a code has been sent.",
+      message: "If this number is registered, a code has been sent.",
     });
   }
 
   // ─── Step 2: Verify OTP ───
   const otp = body.otp?.trim() ?? "";
   if (!otp || !/^\d{6}$/.test(otp)) {
-    return NextResponse.json({ error: "Invalid code format" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid code format" },
+      { status: 400 }
+    );
   }
 
   const limit = rateLimit(`otp-verify:${ip}`, VERIFY_RATE_LIMIT);
   if (!limit.ok) {
     return NextResponse.json(
       { error: "Too many attempts. Try again later." },
-      { status: 429, headers: { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } }
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)),
+        },
+      }
     );
   }
 
-  // Find a valid, unused OTP for this email
+  // Find a valid, unused OTP for this phone
   const [otpRow] = await db
     .select()
     .from(adminOtps)
     .where(
       and(
-        eq(adminOtps.email, email),
+        eq(adminOtps.phone, phone),
         eq(adminOtps.code, otp),
         eq(adminOtps.used, false),
         gt(adminOtps.expiresAt, new Date())
@@ -141,9 +164,9 @@ export async function POST(req: NextRequest) {
 
   // Verify admin still exists
   const [admin] = await db
-    .select({ id: admins.id, email: admins.email })
+    .select({ id: admins.id, phone: admins.phone })
     .from(admins)
-    .where(eq(admins.email, email))
+    .where(eq(admins.phone, phone))
     .limit(1);
 
   if (!admin) {
@@ -160,7 +183,7 @@ export async function POST(req: NextRequest) {
     .where(eq(admins.id, admin.id));
 
   // Create session
-  const token = signSession(admin.email);
+  const token = signSession(admin.phone);
   const res = NextResponse.json({ ok: true, verified: true });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,

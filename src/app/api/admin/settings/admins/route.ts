@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { notificationPhones } from "@/lib/db/schema";
+import { admins } from "@/lib/db/schema";
 import { getCurrentAdmin } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-const MAX_PHONES = 3;
+const MAX_ADMINS = 5;
 
-/** GET — list all notification phones */
-export async function GET() {
-  const admin = await getCurrentAdmin();
-  if (!admin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const phones = await db.select().from(notificationPhones);
-  return NextResponse.json({ phones });
-}
-
-/** POST — add a notification phone */
+/** POST — add a new admin user */
 export async function POST(req: NextRequest) {
   const admin = await getCurrentAdmin();
   if (!admin) {
@@ -43,10 +32,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Normalize: strip spaces, dashes, parentheses. Keep leading +.
+  // Normalize: strip spaces, dashes, parentheses, leading +
   let phone = rawPhone.replace(/[\s\-()]/g, "");
-
-  // If starts with +, strip the +
   if (phone.startsWith("+")) {
     phone = phone.slice(1);
   }
@@ -63,24 +50,24 @@ export async function POST(req: NextRequest) {
   }
 
   // Check count
-  const existing = await db.select().from(notificationPhones);
-  if (existing.length >= MAX_PHONES) {
+  const existing = await db.select().from(admins);
+  if (existing.length >= MAX_ADMINS) {
     return NextResponse.json(
-      { error: `Maximum ${MAX_PHONES} notification numbers allowed` },
+      { error: `Maximum ${MAX_ADMINS} admin users allowed` },
       { status: 409 }
     );
   }
 
   // Check duplicate
-  if (existing.some((p) => p.phone === phone)) {
+  if (existing.some((a) => a.phone === phone)) {
     return NextResponse.json(
-      { error: "This number is already added" },
+      { error: "This phone number is already an admin" },
       { status: 409 }
     );
   }
 
   const [row] = await db
-    .insert(notificationPhones)
+    .insert(admins)
     .values({
       phone,
       label: label || null,
@@ -88,10 +75,10 @@ export async function POST(req: NextRequest) {
     })
     .returning();
 
-  return NextResponse.json({ phone: row }, { status: 201 });
+  return NextResponse.json({ admin: row }, { status: 201 });
 }
 
-/** DELETE — remove a notification phone by id */
+/** DELETE — remove an admin user by id */
 export async function DELETE(req: NextRequest) {
   const admin = await getCurrentAdmin();
   if (!admin) {
@@ -104,9 +91,24 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  await db
-    .delete(notificationPhones)
-    .where(eq(notificationPhones.id, id));
+  // Check how many admins exist — don't allow deleting the last one
+  const all = await db.select().from(admins);
+  if (all.length <= 1) {
+    return NextResponse.json(
+      { error: "Cannot remove the last admin user" },
+      { status: 409 }
+    );
+  }
+
+  // Don't allow deleting yourself
+  if (id === admin.id) {
+    return NextResponse.json(
+      { error: "You cannot remove yourself" },
+      { status: 409 }
+    );
+  }
+
+  await db.delete(admins).where(eq(admins.id, id));
 
   return NextResponse.json({ ok: true });
 }

@@ -1,11 +1,11 @@
 /**
- * Seed the admins table with the initial allowlisted emails.
+ * Seed the admins table with the initial admin phone numbers.
  *
  * Usage: `npm run db:seed`
  *
  * Env vars:
  *   POSTGRES_URL             — Neon pooled connection (required)
- *   INITIAL_ADMIN_EMAILS     — optional comma-separated override
+ *   INITIAL_ADMIN_PHONES     — optional comma-separated override
  *
  * Safe to run multiple times: uses INSERT ... ON CONFLICT DO NOTHING.
  */
@@ -14,39 +14,40 @@ config({ path: ".env.local" });
 
 import { db, admins } from "../src/lib/db";
 
-const DEFAULT_ADMINS = ["holy14@protonmail.com"];
+const DEFAULT_PHONES: string[] = [];
 
 async function main() {
-  const raw = process.env.INITIAL_ADMIN_EMAILS;
-  const emails = raw
+  const raw = process.env.INITIAL_ADMIN_PHONES;
+  const phones = raw
     ? raw
         .split(",")
-        .map((e) => e.trim().toLowerCase())
+        .map((p) => p.trim().replace(/[\s\-()]/g, "").replace(/^\+/, ""))
         .filter(Boolean)
-    : DEFAULT_ADMINS;
+    : DEFAULT_PHONES;
 
-  if (emails.length === 0) {
-    console.log("No admin emails to seed — nothing to do.");
+  if (phones.length === 0) {
+    console.log("No admin phones to seed — set INITIAL_ADMIN_PHONES.");
     return;
   }
 
-  console.log(`Seeding ${emails.length} admin(s):`, emails.join(", "));
+  console.log(`Seeding ${phones.length} admin(s):`, phones.join(", "));
 
   const result = await db
     .insert(admins)
     .values(
-      emails.map((email) => ({
-        email,
+      phones.map((phone) => ({
+        phone,
+        label: "Owner",
         addedBy: "seed-script",
       }))
     )
-    .onConflictDoNothing({ target: admins.email })
+    .onConflictDoNothing({ target: admins.phone })
     .returning();
 
   console.log(`Inserted ${result.length} new admin(s).`);
-  if (result.length < emails.length) {
+  if (result.length < phones.length) {
     console.log(
-      `(${emails.length - result.length} already existed — left untouched.)`
+      `(${phones.length - result.length} already existed — left untouched.)`
     );
   }
 }

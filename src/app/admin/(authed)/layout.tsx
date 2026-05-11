@@ -43,7 +43,7 @@ export default async function AuthedAdminLayout({
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline text-xs text-stone-500">
-              {admin.email}
+              {admin.label ?? `+${admin.phone}`}
             </span>
             <LogoutButton />
           </div>

@@ -102,11 +102,13 @@ export const orderStatusHistory = pgTable(
   })
 );
 
-/** Admin allowlist. Magic-link auth (Auth.js) will check email against this
- *  table. Seed row is inserted by the first migration. */
+/** Admin allowlist. Login is via SMS OTP sent to the phone number.
+ *  Email is optional (for display / future use). */
 export const admins = pgTable("admins", {
   id: uuid("id").defaultRandom().primaryKey(),
-  email: text("email").notNull().unique(),
+  phone: text("phone").notNull().unique(),
+  label: text("label"), // e.g. "Owner", "Manager"
+  email: text("email"),
   addedBy: text("added_by"),
   addedAt: timestamp("added_at", { withTimezone: true })
     .defaultNow()
@@ -126,12 +128,12 @@ export const notificationPhones = pgTable("notification_phones", {
     .notNull(),
 });
 
-/** OTP codes for passwordless admin login. Short-lived, single-use. */
+/** OTP codes for passwordless admin login via SMS. Short-lived, single-use. */
 export const adminOtps = pgTable(
   "admin_otps",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    email: text("email").notNull(),
+    phone: text("phone").notNull(),
     code: text("code").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     used: boolean("used").default(false).notNull(),
@@ -140,7 +142,7 @@ export const adminOtps = pgTable(
       .notNull(),
   },
   (t) => ({
-    emailIdx: index("admin_otps_email_idx").on(t.email),
+    phoneIdx: index("admin_otps_phone_idx").on(t.phone),
   })
 );
 

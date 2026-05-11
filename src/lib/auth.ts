@@ -5,11 +5,9 @@ import { db } from "@/lib/db";
 import { admins } from "@/lib/db/schema";
 
 /** Cookie-based admin session. Deliberately minimal:
- *   cookie value = base64url(`${email}.${expiresAt}`) + "." + hmac_sha256
- *  We verify HMAC + expiry server-side, then confirm the email still exists
- *  in the `admins` allowlist. No DB-side sessions, no JWT library.
- *
- *  Upgradeable to magic-link auth later without touching the admins table. */
+ *   cookie value = base64url(`${phone}.${expiresAt}`) + "." + hmac_sha256
+ *  We verify HMAC + expiry server-side, then confirm the phone still exists
+ *  in the `admins` allowlist. No DB-side sessions, no JWT library. */
 
 const COOKIE_NAME = "tes_admin";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -44,20 +42,17 @@ function sign(payload: string): string {
   );
 }
 
-// Payload separator must NOT appear in emails. "|" satisfies RFC 5321 (the
-// local-part permits dots but not pipes).
 const PAYLOAD_SEP = "|";
 
-export function signSession(email: string): string {
+export function signSession(phone: string): string {
   const expiresAt = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
-  const payload = `${email}${PAYLOAD_SEP}${expiresAt}`;
+  const payload = `${phone}${PAYLOAD_SEP}${expiresAt}`;
   const mac = sign(payload);
   return `${b64urlEncode(payload)}.${mac}`;
 }
 
-/** Parse + HMAC-verify + expiry-check. Returns email on success, null on
- *  any tampering / expiry / malformed input. Does NOT hit the admins table —
- *  callers that need allowlist enforcement must call `requireAdmin`. */
+/** Parse + HMAC-verify + expiry-check. Returns phone on success, null on
+ *  any tampering / expiry / malformed input. */
 export function verifySession(token: string | undefined): string | null {
   if (!token) return null;
   const [payloadB64, macB64] = token.split(".");
@@ -84,29 +79,35 @@ export function verifySession(token: string | undefined): string | null {
 
   const sepIdx = payload.lastIndexOf(PAYLOAD_SEP);
   if (sepIdx === -1) return null;
-  const email = payload.slice(0, sepIdx);
+  const phone = payload.slice(0, sepIdx);
   const exp = Number(payload.slice(sepIdx + 1));
-  if (!email || !Number.isFinite(exp)) return null;
+  if (!phone || !Number.isFinite(exp)) return null;
   if (exp < Math.floor(Date.now() / 1000)) return null;
-  return email;
+  return phone;
 }
 
-/** Full check: valid cookie AND email still in admins table.
- *  Returns the admin row (includes id) or null. Updates lastLoginAt on
- *  successful read so we can see activity in the admin list later. */
+/** Full check: valid cookie AND phone still in admins table.
+ *  Returns the admin row or null. */
 export async function getCurrentAdmin(): Promise<{
   id: string;
-  email: string;
+  phone: string;
+  label: string | null;
+  email: string | null;
 } | null> {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;
-  const email = verifySession(token);
-  if (!email) return null;
+  const phone = verifySession(token);
+  if (!phone) return null;
 
   const [row] = await db
-    .select({ id: admins.id, email: admins.email })
+    .select({
+      id: admins.id,
+      phone: admins.phone,
+      label: admins.label,
+      email: admins.email,
+    })
     .from(admins)
-    .where(eq(admins.email, email))
+    .where(eq(admins.phone, phone))
     .limit(1);
   return row ?? null;
 }
