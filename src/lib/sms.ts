@@ -5,12 +5,12 @@
  *    APPHIVE_CLIENT_SECRET – your client secret
  *    APPHIVE_TOKEN         – wallet token
  *
- *  API: POST https://api.sierrahive.com/v1/messages/sms
- *  Auth: Basic base64(clientId:clientSecret)
- *  Wallet: X-Wallet: Token {token}
+ *  API: GET https://api.sierrahive.com/v1/messages/sms
+ *  Auth: credentials passed as URL query parameters
+ *  Phone format: E.164 WITHOUT leading + (e.g. 23275696192)
  */
 
-const API_URL = "https://api.sierrahive.com/v1/messages/sms";
+const API_BASE = "https://api.sierrahive.com/v1/messages/sms";
 const SENDER_ID = "Tesmaraneh"; // max 11 chars
 
 function getCredentials() {
@@ -23,7 +23,7 @@ function getCredentials() {
   return { clientId, clientSecret, token };
 }
 
-/** Send a single SMS. Returns true on success, false on failure.
+/** Send a single SMS via GET request. Returns true on success, false on failure.
  *  Never throws — SMS is best-effort so it shouldn't block orders. */
 export async function sendSms(
   to: string,
@@ -36,40 +36,36 @@ export async function sendSms(
     return false;
   }
 
-  const basicAuth = Buffer.from(
-    `${creds.clientId}:${creds.clientSecret}`
-  ).toString("base64");
+  // E.164 without + prefix (as per AppHiveSL docs)
+  const toNumber = to.replace(/^\+/, "");
 
   try {
-    const toNumber = to.startsWith("+") ? to : `+${to}`;
-    const payload = {
+    const params = new URLSearchParams({
+      clientId: creds.clientId,
+      clientSecret: creds.clientSecret,
+      token: creds.token,
       from: SENDER_ID,
       to: toNumber,
       content,
-      ...(reference ? { reference } : {}),
-    };
-
-    console.log("[sms] Sending to AppHiveSL:", JSON.stringify({ to: toNumber, from: SENDER_ID, contentLen: content.length }));
-
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${basicAuth}`,
-        "X-Wallet": `Token ${creds.token}`,
-      },
-      body: JSON.stringify(payload),
     });
+    if (reference) {
+      params.set("reference", reference);
+    }
+
+    const url = `${API_BASE}?${params.toString()}`;
+    const res = await fetch(url, { method: "GET" });
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       console.error(
-        `[sms] AppHiveSL error ${res.status}:`,
+        `[sms] AppHiveSL GET returned ${res.status} for to=${toNumber}:`,
         text.slice(0, 500)
       );
       return false;
     }
 
+    const data = await res.json().catch(() => null);
+    console.log("[sms] AppHiveSL response:", JSON.stringify(data));
     return true;
   } catch (err) {
     console.error("[sms] Failed to send SMS:", err);
